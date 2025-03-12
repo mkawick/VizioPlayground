@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public abstract partial class IHideableObject: MonoBehaviour
@@ -8,15 +9,18 @@ public abstract partial class IHideableObject: MonoBehaviour
     bool _isVisible;
 
     Vector3 _lastPosition;
-    bool _hasMoved;
+    bool _visibilityDirty;
     public int HideableId { get; set; }
 
-    public bool HasMoved { get { return _hasMoved; } }
-    public void ClearMoved() { _hasMoved = false; }
+    int invisioStack = 0;
+    int superVisionStack = 0;
+
+    public bool VisibilityDirty { get { return _visibilityDirty; } }
+    public void ClearDirty() { _visibilityDirty = false; }
 
     private void Start()
     {
-        _hasMoved = false;
+        _visibilityDirty = false;
         _isVisible = true;
         _lastPosition = transform.position;
 
@@ -53,7 +57,7 @@ public abstract partial class IHideableObject: MonoBehaviour
         if (movedDist > 0.01f)
         {
             _lastPosition = transform.position;
-            _hasMoved = true;
+            _visibilityDirty = true;
         }
     }
 
@@ -89,5 +93,19 @@ public abstract partial class IHideableObject: MonoBehaviour
         {
             _meshRenderer[i].enabled = visible;
         }
+    }
+
+    internal bool HasInvisibilityEffectActive()
+    {
+        if(invisioStack == 0)
+            return false;
+        return true;
+    }
+
+    internal bool HasSuperVision()
+    {
+        if (superVisionStack == 0)
+            return false;
+        return true;
     }
 }

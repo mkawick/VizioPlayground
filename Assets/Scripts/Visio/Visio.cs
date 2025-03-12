@@ -244,26 +244,26 @@ public class Visio : MonoBehaviour
 
     private void InformHidablesThatMyVisibilityHasChanged(IHideableObject hideable, List<int> listOfVisibleZones, bool makeVisible, bool changeMeshState)
     {
-        HashSet<int> objectsInZone = new HashSet<int>();
-        var zoneId = hideable.GetZone();
+        var zoneId = hideable.GetZone();        
+        var objectsInZone = GrabAllCharactersInZones(zoneId, listOfVisibleZones);
 
-        // ensure the current zone is considered
-        _tinyWizPlayerManager.GetAllPlayersInZone(zoneId, objectsInZone);
-        foreach (var zoneThatSeeThisOne in listOfVisibleZones)
-        {
-            if (zoneId == zoneThatSeeThisOne)// prevent bad setup bug where designer lists a zone in it's visible zones
-                continue;
-            _tinyWizPlayerManager.GetAllPlayersInZone(zoneThatSeeThisOne, objectsInZone);
-        }
-        
+        bool hasInvisoOn = hideable.HasInvisibilityEffectActive();
+
         var hidableId = hideable.HideableId;
         foreach (var newObjId in objectsInZone)
         {
+            bool newVisibilityState = makeVisible;
             if (_tinyWizPlayerManager.AllObjects.ContainsKey(newObjId))
             {
                 var newObj = _tinyWizPlayerManager.AllObjects[newObjId];
-                ChangeVisibility(makeVisible, newObj, hidableId, changeMeshState);
+                bool canSeeAnyway = newObj.HasSuperVision();
 
+                if (makeVisible == false && canSeeAnyway)
+                    newVisibilityState = true;
+                if (hasInvisoOn == true)
+                    newVisibilityState = false;
+
+                ChangeVisibility(makeVisible, newObj, hidableId, changeMeshState);
             }
         }
     }
@@ -292,10 +292,10 @@ public class Visio : MonoBehaviour
         var hideables = _tinyWizPlayerManager.AttentiveObjects;
         foreach (var hideable in hideables.Values)
         {
-            if (hideable.HasMoved == false)
+            if (hideable.VisibilityDirty == false)
                 continue;
 
-            hideable.ClearMoved();
+            hideable.ClearDirty();
 
             int newZoneId;
             VizZone vizZone;
@@ -448,6 +448,21 @@ public class Visio : MonoBehaviour
                 break;// inner most zone
             }
         }
+    }
+
+    private HashSet<int> GrabAllCharactersInZones(int zoneId, List<int> listOfVisibleZones)
+    {
+        HashSet<int> objectsInZone = new HashSet<int>();
+
+        // ensure the current zone is considered
+        _tinyWizPlayerManager.GetAllPlayersInZone(zoneId, objectsInZone);
+        foreach (var zoneThatSeeThisOne in listOfVisibleZones)
+        {
+            if (zoneId == zoneThatSeeThisOne)// prevent bad setup bug where designer lists a zone in it's visible zones
+                continue;
+            _tinyWizPlayerManager.GetAllPlayersInZone(zoneThatSeeThisOne, objectsInZone);
+        }
+        return objectsInZone;
     }
 
     VizZone GetZone(int zoneId)
