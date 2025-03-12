@@ -103,6 +103,8 @@ public class TinyWizHideableManager : MonoBehaviour
             Debug.LogError("nothing to despawn");
             return;
         }
+        var obj = spawnedHistory[0];
+        Destroy(obj);
         spawnedHistory.RemoveAt(0);
     }
 
