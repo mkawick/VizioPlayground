@@ -72,12 +72,6 @@ public class TinyWizHideableManager : MonoBehaviour
     }
 
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     /// TODO - test
     void SpawnObj()
     {

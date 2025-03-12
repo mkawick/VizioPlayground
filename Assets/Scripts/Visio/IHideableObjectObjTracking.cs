@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using Sirenix.OdinInspector.Editor.Validation;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using UnityEditor.VersionControl;
 using UnityEngine;
 
 public abstract partial class IHideableObject: MonoBehaviour
 {
-    HashSet<int> _objectsISee = new HashSet<int>();
+    protected HashSet<int> _objectsISee = new HashSet<int>();
     internal HashSet<int> ObjectsISee => _objectsISee;
 
     public struct HistoricalListOfObjectsISaw
@@ -89,20 +92,49 @@ public abstract partial class IHideableObject: MonoBehaviour
         }
     }
 
-    public void ObjectBecameVisible(int objId)
+    public virtual void ClearHistory(int timeStamp)
+    {
+        // this is a queue and is ordered by time.. fall out early 
+        while (objectsIUsedToSee.Count > 0)
+        {
+            if (objectsIUsedToSee.Peek()._timestamp < timeStamp)
+            {
+                var history = objectsIUsedToSee.Dequeue();
+                foreach(var objId in history._objectsISee)
+                {
+                    _objectsISee.Remove(objId);
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+
+    protected void AddHidableToHistory(int objId, bool validate)
+    {
+        if(validate)
+        {
+            if (_objectsISee.Contains(objId) == false)
+                return;
+        }
+        HashSet<int> objIdsThatIKnew = new HashSet<int> { objId };
+        CacheAllVisibleObjects(Time.frameCount, objIdsThatIKnew);
+    }
+
+    public virtual void ObjectBecameVisible(int objId)
     {
         if (Observant)
         {
             _objectsISee.Add(objId);
-            // TODO inform AI 
         }
     }
-    public void ObjectBecameInvisible(int objId)
+    public virtual void ObjectBecameInvisible(int objId)
     {
         if (Observant)
         {
-            _objectsISee.Remove(objId);
-            // TODO inform AI 
+            AddHidableToHistory(objId, true);
         }
     }
 

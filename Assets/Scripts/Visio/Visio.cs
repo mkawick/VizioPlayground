@@ -249,7 +249,8 @@ public class Visio : MonoBehaviour
 
             if(history.Count() > 0)
             {
-                var hideableId = hideable.HideableId;
+                hideable.ClearHistory(Time.frameCount - numFramesAfterLeavingRoomToHide);
+              /*  var hideableId = hideable.HideableId;
                 // we will never need to do more than 1 per frame
                 history.TryPeek(out var result);
                 if(result._timestamp + numFramesAfterLeavingRoomToHide < Time.frameCount)
@@ -266,18 +267,8 @@ public class Visio : MonoBehaviour
                     }
 
                     HideMeshesForLocalPlayer(hideable, peepsToInform._objectsISee, _tinyWizPlayerManager.AllObjects);
-                }
+                }*/
             }
-        }
-    }
-
-    void TellHidableThatOtherHidableIsNoLongerVisible(IHideableObject observer, IHideableObject observed)
-    {
-        observer.ObjectBecameInvisible(observed.HideableId);
-
-        if(observer == _localPlayer)
-        {
-            observed.MakeMeshVisible(false);
         }
     }
 
@@ -512,20 +503,10 @@ public class Visio : MonoBehaviour
         if (makeVisible)
         {
             newObj.ObjectBecameVisible(hidableId);
-
-            if (changeMeshState == true)
-            {
-                newObj.MakeMeshVisible(true);
-            }
         }
         else
         {
             newObj.ObjectBecameInvisible(hidableId);
-
-            if (changeMeshState == true)
-            {
-                newObj.MakeMeshVisible(false);
-            }
         }
     }
 }

@@ -1,6 +1,7 @@
 using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor.SearchService;
 using UnityEngine;
 using static IHideableObject;
@@ -32,7 +33,8 @@ public class HideableItemPropertyViewer : MonoBehaviour
         var viewHistory = hideableObject.objectsIUsedToSee;
         if (viewHistory != null && viewHistory.Count != 0)
         {
-            var history = viewHistory.Dequeue();
+            hideableObject.ClearHistory(Time.frameCount);
+            /*var history = viewHistory.Dequeue();
             foreach(var objId in history._objectsISee)
             {
                 var obj = _tinyWizPlayerManager.GetObjectById(objId);
@@ -42,7 +44,7 @@ public class HideableItemPropertyViewer : MonoBehaviour
                     Debug.Log("don't fool yourself, this is not done.. this object needs to hide you too, deque may be enough");
                     //objectsISee.Add(obj.name);
                 }
-            }
+            }*/
                 
 
             Debug.Log("Items removed");
@@ -62,34 +64,31 @@ public class HideableItemPropertyViewer : MonoBehaviour
             myLastZone = myZone;
             myZone = tempZone;
         }
-        UpdateLiseOfVisibleObjects();
+        UpdateListOfVisibleObjects();
 
         ShowConnections();
 
         UpdateHistoricalView();
-
-        
     }
 
-    private void UpdateLiseOfVisibleObjects()
+    private void UpdateListOfVisibleObjects()
     {
         var visibleObjects = hideableObject.ObjectsISee;
-        bool areTheSame = true;
         var replacementObjectsISee = new List<string>();
+        int matchingCount = 0;
         foreach (var objId in visibleObjects)
         {
             var obj = _tinyWizPlayerManager.GetObjectById(objId);
             if (obj)
             {
+                if (objectsISee.Contains(obj.name))
+                    matchingCount++;
                 replacementObjectsISee.Add(obj.name);
-                if (areTheSame == true)// && objectsISee.Contains(obj.name) == false)
-                {
-                    areTheSame = false;
-                }
             }
         }
 
-        if(areTheSame == false)
+        if (replacementObjectsISee.Count != matchingCount 
+            || objectsISee.Count != matchingCount)
         {
             objectsISee = replacementObjectsISee;
         }

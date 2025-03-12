@@ -4,7 +4,7 @@ using UnityEngine;
 public abstract partial class IHideableObject: MonoBehaviour
 {
     Renderer[] _meshRenderer;
-    static TinyWizHideableManager _tinyWizHideableManager;
+    static protected TinyWizHideableManager _tinyWizHideableManager;
     bool _isVisible;
 
     Vector3 _lastPosition;
@@ -45,11 +45,12 @@ public abstract partial class IHideableObject: MonoBehaviour
     }
     private void Update()
     {
-        if(Observant)
+        if(!Observant)
         {
             return;
         }
-        if((transform.position- _lastPosition).sqrMagnitude > 0.01f)
+        var movedDist = (transform.position - _lastPosition).sqrMagnitude;
+        if (movedDist > 0.01f)
         {
             _lastPosition = transform.position;
             _hasMoved = true;
