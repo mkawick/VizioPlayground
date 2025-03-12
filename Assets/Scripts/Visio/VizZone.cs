@@ -2,7 +2,6 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using TMPro;
 using System;
-using UnityEngine.UIElements;
 using System.Collections.Generic;
 
 public class VizZone : MonoBehaviour
@@ -13,6 +12,7 @@ public class VizZone : MonoBehaviour
     public Material highlightMaterial;
     public int[] _ListOfVisibleZones;
     internal List<int> externalZonesThatSeeMe;
+    bool showSelection;
 
     Material normalMaterial;
 
@@ -23,18 +23,36 @@ public class VizZone : MonoBehaviour
         text.text = num.TrimStart(new Char[] { '0' });
         normalMaterial = this.GetComponent<MeshRenderer>().material;
         externalZonesThatSeeMe = new List<int>();
+        showSelection = false;
+    }
+
+    void OnDrawGizmos()
+    {
+        if (showSelection)
+        {
+            Color oldColor = Gizmos.color;
+
+            var one = new Vector3(1, 1, 1);
+            Gizmos.color = new Color(0.98f, 0.98f, 0.07f, 0.2f);
+            Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, one);
+            Gizmos.DrawCube(Vector3.zero, transform.localScale);
+            //Gizmos.DrawWireSphere(Vector3.zero, 2);
+
+            Gizmos.color = oldColor;
+        }
     }
 
     public void ShowSelected(bool show)
     {
-        if(show)
-        {
-            this.GetComponent<MeshRenderer>().material = highlightMaterial;
-        }
-        else
-        {
-            this.GetComponent<MeshRenderer>().material = normalMaterial;
-        }
+        showSelection = show;
+          if (show)
+          {
+              //this.GetComponent<MeshRenderer>().material = highlightMaterial;
+          }
+          else
+          {
+              //this.GetComponent<MeshRenderer>().material = normalMaterial;
+          }
     }
     void OnValidate()
     {

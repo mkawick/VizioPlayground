@@ -4887,8 +4887,17 @@ MonoBehaviour:
   numFramesAfterLeavingZoneBeforeHide: 120
   clearHistory: 0
   zoneToSelect: 8
-  _ListOfVisibleZones: 1600000017000000
-  ErrorText: 
+  _ListOfVisibleZones: 16000000
+  ErrorText: 'OpenField is missing collider
+
+    MissingVizZone is missing collider
+
+    MissingVizZone
+    (1) is missing collider
+
+    MissingVizZone (2) is missing collider
+
+'
 --- !u!1 &1754742998
 GameObject:
   m_ObjectHideFlags: 0
