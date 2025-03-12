@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Chao1
+  m_EditorClassIdentifier: 
+  m_GroupName: Chao1
+  m_GUID: 0d1f32c22fe4d9d44b51dfc3331ee94e
+  m_SerializeEntries:
+  - m_GUID: 5c4ff1c9dbe476242ad0bcc04c0b69b9
+    m_Address: CuttingCounter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 909fc15883c504b4c98a148829c52324
+    m_Address: ContainerCounter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 93af8b85a17635f40a5b76ed82a86c18
+    m_Address: StoveCounter_Visual
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c4e141bc61e807b4b832b850d92f5fd7
+    m_Address: TrashCounter_Visual
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 3c30e219d651c0f47a961371ac831ede, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 1a7e142e1a478734e9d44c29a49707c7, type: 2}
+    - {fileID: 11400000, guid: d912416f7ef8468418e7d1bb2f8e3273, type: 2}

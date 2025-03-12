@@ -1,0 +1,124 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1654138055751373207
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4343481908024668621}
+  - component: {fileID: 7713590603041378711}
+  m_Layer: 0
+  m_Name: VariantParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4343481908024668621
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1654138055751373207}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4915406206943738118}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7713590603041378711
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1654138055751373207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02b44e5bc557f294c92ecfabf0734dc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  errorTooManyComponents: Anchors only on types of more than 2 components, remove
+    other components
+  errorIsPrefabOverride: overrides cannot be made into addressables
+--- !u!1001 &5673431311224940092
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 4343481908024668621}
+    m_Modifications:
+    - target: {fileID: 759723300544159546, guid: 9896afe5909ba1c4790e5bf5ccfa51da,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.9875716
+      objectReference: {fileID: 0}
+    - target: {fileID: 759723300544159546, guid: 9896afe5909ba1c4790e5bf5ccfa51da,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.35119593
+      objectReference: {fileID: 0}
+    - target: {fileID: 759723300544159546, guid: 9896afe5909ba1c4790e5bf5ccfa51da,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -3.8488965
+      objectReference: {fileID: 0}
+    - target: {fileID: 759723300544159546, guid: 9896afe5909ba1c4790e5bf5ccfa51da,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 759723300544159546, guid: 9896afe5909ba1c4790e5bf5ccfa51da,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 759723300544159546, guid: 9896afe5909ba1c4790e5bf5ccfa51da,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 759723300544159546, guid: 9896afe5909ba1c4790e5bf5ccfa51da,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 759723300544159546, guid: 9896afe5909ba1c4790e5bf5ccfa51da,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 759723300544159546, guid: 9896afe5909ba1c4790e5bf5ccfa51da,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 759723300544159546, guid: 9896afe5909ba1c4790e5bf5ccfa51da,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5816456810605902905, guid: 9896afe5909ba1c4790e5bf5ccfa51da,
+        type: 3}
+      propertyPath: m_Name
+      value: SjorsAlone02 Variant
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9896afe5909ba1c4790e5bf5ccfa51da, type: 3}
+--- !u!4 &4915406206943738118 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 759723300544159546, guid: 9896afe5909ba1c4790e5bf5ccfa51da,
+    type: 3}
+  m_PrefabInstance: {fileID: 5673431311224940092}
+  m_PrefabAsset: {fileID: 0}

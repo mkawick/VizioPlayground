@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed625a332fa6e7c42be8876818470bb0, type: 3}
+  m_Name: CheeseCut
+  m_EditorClassIdentifier: 
+  input: {fileID: 11400000, guid: 909789d6871707f43a9138a7c79c403c, type: 2}
+  output: {fileID: 11400000, guid: b90991ccfbe29f64f91a9e9606757268, type: 2}
+  cutsToSucceed: 3
