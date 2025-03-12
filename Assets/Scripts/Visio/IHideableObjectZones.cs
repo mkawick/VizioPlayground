@@ -20,7 +20,7 @@ public abstract partial class IHideableObject: MonoBehaviour
         }
         foreach (var zone in zones)
         {
-            if (!_zonesISee.Contains(zoneId))
+            if (!_zonesISee.Contains(zone))
                 _zonesISee.Add(zone);
         }
 

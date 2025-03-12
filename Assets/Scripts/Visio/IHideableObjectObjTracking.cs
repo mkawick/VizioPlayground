@@ -59,36 +59,41 @@ public abstract partial class IHideableObject: MonoBehaviour
     {
         List<int> OldZones = _zonesISee;
         int myOldZone = _zoneIAmIn;
-        HashSet<int> objIdsThatIKnew = CollectAllObjectsThatISee();
+        HashSet<int> prevZoneObjs = CollectAllObjectsThatISee();
 
         // set the current ones
         _zonesISee = visibleZones;
         _zoneIAmIn = newZoneId;
-        HashSet<int> setOfNewObjIds = CollectAllObjectsThatISee();
+        HashSet<int> newlySeenObjs = CollectAllObjectsThatISee();
 
         if (Observant)
         {
             // reduce the set of old ones
-            List<int> itemsToRemove = new List<int>();
-            foreach (var obj in objIdsThatIKnew)
-            {
-                if (setOfNewObjIds.Contains(obj))
-                {
-                    itemsToRemove.Add(obj);
-                }
-            }
-            foreach (var item in itemsToRemove)
-            {
-                objIdsThatIKnew.Remove(item);
-            }
+            RemoveCurrentlyVisibleItemsFromHistory(newlySeenObjs, prevZoneObjs);
 
             // save the old ones
-            CacheAllVisibleObjects(Time.frameCount, objIdsThatIKnew);
+            CacheAllVisibleObjects(Time.frameCount, prevZoneObjs);
 
-            _objectsISee = setOfNewObjIds;
+            _objectsISee = newlySeenObjs;
             // walk the list of new ones to let them know that they can see me
             // make sure that you are visible to them
             //_tinyWizHideableManager.InformObjectThatIAmVisible(HideableId, setOfNewObjIds);
+        }
+    }
+
+    void RemoveCurrentlyVisibleItemsFromHistory(HashSet<int> currentlySeenObjs, HashSet<int> history)
+    {
+        List<int> objectsIStillSee = new List<int>();
+        foreach (var prevZoneObj in history)
+        {
+            if (currentlySeenObjs.Contains(prevZoneObj))
+            {
+                objectsIStillSee.Add(prevZoneObj);
+            }
+        }
+        foreach (var item in objectsIStillSee)
+        {
+            history.Remove(item);
         }
     }
 
@@ -99,8 +104,11 @@ public abstract partial class IHideableObject: MonoBehaviour
         {
             if (objectsIUsedToSee.Peek()._timestamp < timeStamp)
             {
+                HashSet<int> currentlySeenObjs = CollectAllObjectsThatISee();
                 var history = objectsIUsedToSee.Dequeue();
-                foreach(var objId in history._objectsISee)
+                RemoveCurrentlyVisibleItemsFromHistory(currentlySeenObjs, history._objectsISee);
+
+                foreach (var objId in history._objectsISee)
                 {
                     _objectsISee.Remove(objId);
                 }
@@ -114,6 +122,9 @@ public abstract partial class IHideableObject: MonoBehaviour
 
     protected void AddHidableToHistory(int objId, bool validate)
     {
+        if(objId == HideableId)// don't save self
+            { return; }
+
         if(validate)
         {
             if (_objectsISee.Contains(objId) == false)
@@ -127,6 +138,10 @@ public abstract partial class IHideableObject: MonoBehaviour
     {
         if (Observant)
         {
+            if(objId == HideableId)
+            {
+                return; // don't add self
+            }
             _objectsISee.Add(objId);
         }
     }

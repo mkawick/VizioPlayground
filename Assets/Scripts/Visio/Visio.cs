@@ -162,10 +162,13 @@ public class Visio : MonoBehaviour
     }
     
 
-    private void FinishInit()
+    private void AddAllObjectsToZones()
     {
-        var hideables = _tinyWizPlayerManager.AllObjects;
-        foreach (var hideable in hideables.Values)
+        var hideables = _tinyWizPlayerManager.NewlySpawnedObjects;
+        if (hideables.Count == 0)
+            return;
+
+        foreach (var hideable in hideables)
         {
             SetInitialZone(hideable);
             if (hideable.IsLocalPlayer())
@@ -178,7 +181,8 @@ public class Visio : MonoBehaviour
         MakeAllObjectsAwareOfOneAnother();
         ShowInitialObjectsToLocalPlayer();
 
-        _hasFinishedInit = true;
+        //_hasFinishedInit = true;
+        _tinyWizPlayerManager.NewlySpawnedObjects.Clear();
     }
 
     private void FindMostLikelyContainingZone(IHideableObject you, LayerMask layerToSearch, int searchRadius, out int zoneToSet, out VizZone vizZone)
@@ -206,7 +210,7 @@ public class Visio : MonoBehaviour
         if(_hasFinishedInit == false && _tinyWizPlayerManager && 
             _tinyWizPlayerManager.HasFinishedInit)
         {
-            FinishInit();
+            AddAllObjectsToZones();
         }
 
         // update everyone's zones
@@ -250,60 +254,10 @@ public class Visio : MonoBehaviour
             if(history.Count() > 0)
             {
                 hideable.ClearHistory(Time.frameCount - numFramesAfterLeavingRoomToHide);
-              /*  var hideableId = hideable.HideableId;
-                // we will never need to do more than 1 per frame
-                history.TryPeek(out var result);
-                if(result._timestamp + numFramesAfterLeavingRoomToHide < Time.frameCount)
-                {
-                    var peepsToInform = history.Dequeue();
-                    var thoseToNotify = _tinyWizPlayerManager.AttentiveObjects;
-                    foreach(var oldObserver in peepsToInform._objectsISee)
-                    {
-                        if(thoseToNotify.ContainsKey(oldObserver))
-                        {
-                            // let them know that I don't exist
-                            thoseToNotify[oldObserver].ObjectBecameInvisible(hideableId);
-                        }
-                    }
-
-                    HideMeshesForLocalPlayer(hideable, peepsToInform._objectsISee, _tinyWizPlayerManager.AllObjects);
-                }*/
             }
         }
     }
 
-    /*  private void InformSeenObjectsThatNewObjectIsVisible( IHideableObject hideable, bool changeMeshState)
-      {
-          var hidableId = hideable.HideableId;
-          foreach (var newObjId in hideable.ObjectsISee)
-          {
-              if (_tinyWizPlayerManager.AllObjects.ContainsKey(newObjId))
-              {
-                  var newObj = _tinyWizPlayerManager.AllObjects[newObjId];
-                  newObj.ObjectBecameVisible(hidableId);
-
-                  if (changeMeshState == true) 
-                  {
-                      newObj.MakeMeshVisible(true);
-                  }
-              }
-          }
-      }
-      v
-      // todo ... fix viz zone -1... other zones need to see*/
-
-    
-
-    /* void HideMeFromLostPlayers()
-     {
-
-         HashSet<int> objectsInZone = new HashSet<int>();
-         _tinyWizPlayerManager.GetAllPlayersInRoom(hideable.GetZone(), objectsInZone);
-         foreach (var zoneThatSeeThisOne in listOfVisibleZones)
-         {
-             _tinyWizPlayerManager.GetAllPlayersInRoom(zoneThatSeeThisOne, objectsInZone);
-         }
-     }*/
     private void InformHidablesThatMyVisibilityHasChanged(IHideableObject hideable, List<int> listOfVisibleZones, bool makeVisible, bool changeMeshState)
     {
         HashSet<int> objectsInZone = new HashSet<int>();

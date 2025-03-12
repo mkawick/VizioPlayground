@@ -8,6 +8,10 @@ public class HideablePlayerController : IHideableObject
 
     public override void ObjectBecameVisible(int objId)
     {
+        if (objId == HideableId)
+        {
+            return; // don't add self
+        }
         var obj = _tinyWizHideableManager.GetObjectById(objId);
         if(obj != null)
         {

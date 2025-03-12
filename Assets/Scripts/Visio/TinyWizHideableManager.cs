@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using UnityEngine;
 using Sirenix.OdinInspector;
 using static UnityEditor.FilePathAttribute;
+using Unity.VisualScripting;
 
 public class KeyDoesNotExistException : SystemException
 {
@@ -17,6 +18,8 @@ public class KeyDoesNotExistException : SystemException
 public class TinyWizHideableManager : MonoBehaviour
 {
     Dictionary<int, IHideableObject> allHidableObjects = new Dictionary<int, IHideableObject>();
+    List<IHideableObject> newlySpawnedObjects = new List<IHideableObject>();
+
     bool hasFinishedInit = false;
     internal int incrementingHidableId = 1;
 
@@ -25,22 +28,10 @@ public class TinyWizHideableManager : MonoBehaviour
         hasFinishedInit = true;
     }
 
-    [Button]
-    void SpawnPlayer()
-    {
-        /* Visio visio = GameObject.FindAnyObjectByType<Visio>();
-         var zones = visio.ZoneList;*/
-        PositionMover pm = GameObject.FindAnyObjectByType< PositionMover>();
-        if(pm == null)
-        {
-            Debug.Log("PositionMover DNE");
-            return;
-        }
-       // Locations
-    }
-
     public Dictionary<int, IHideableObject> AllObjects => allHidableObjects;
     public Dictionary<int, IHideableObject> AttentiveObjects => allHidableObjects.Where(kv => kv.Value.Observant == true).ToDictionary(kv => kv.Key, kv => kv.Value);
+    public List<IHideableObject> NewlySpawnedObjects => newlySpawnedObjects;
+
     public bool HasFinishedInit => hasFinishedInit;
 
     internal IHideableObject GetObjectById(int id)
@@ -58,6 +49,7 @@ public class TinyWizHideableManager : MonoBehaviour
             obj.Hide();
             obj.HideableId = incrementingHidableId++;
             allHidableObjects.Add(obj.HideableId, obj);
+            newlySpawnedObjects.Add(obj);
         }
     }
     public void Remove(IHideableObject obj)
@@ -68,20 +60,50 @@ public class TinyWizHideableManager : MonoBehaviour
             {
                 allHidableObjects.Remove(obj.HideableId);
             }
+            if (newlySpawnedObjects.Contains(obj))
+                newlySpawnedObjects.Remove(obj);
         }
     }
 
+    int spawnedIndex = 100;
+    List<IHideableObject> spawnedHistory;
 
-    /// TODO - test
+    [Button]
     void SpawnObj()
     {
+        if (spawnedHistory == null)
+            spawnedHistory = new List<IHideableObject>();
+        var choice = UnityEngine.Random.Range(0, AllObjects.Count);
+        var choosenItem = allHidableObjects.Skip(choice).First();
 
+        Vector3 pos = choosenItem.Value.transform.position;
+        Quaternion rot = choosenItem.Value.transform.rotation;
+        Vector2 randomXY = UnityEngine.Random.insideUnitCircle * 3;
+        pos += new Vector3(randomXY.x, 0, randomXY.y);
+        var r = UnityEngine.Random.rotation;
+
+        var obj = GameObject.Instantiate(choosenItem.Value, pos, rot * r);
+        obj.name = $"spawn {choosenItem.Value.name}-{spawnedIndex++}";
+        obj.Show();
+        obj.transform.parent = this.transform;// heirarchy setup
+
+        spawnedHistory.Add(obj);
     }
 
-    /// TODO - test
+    [Button]
     void DeleteSpawnedObject()
     {
-
+        if(spawnedHistory == null)
+        {
+            Debug.LogError("nothing spawned");
+            return;
+        }
+        if(spawnedHistory.Count < 1)
+        {
+            Debug.LogError("nothing to despawn");
+            return;
+        }
+        spawnedHistory.RemoveAt(0);
     }
 
     internal void GetAllPlayersInRoom(int zoneId,
