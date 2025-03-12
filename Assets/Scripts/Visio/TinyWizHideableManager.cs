@@ -104,7 +104,7 @@ public class TinyWizHideableManager : MonoBehaviour
             return;
         }
         var obj = spawnedHistory[0];
-        Destroy(obj);
+        DestroyImmediate(obj.gameObject);
         spawnedHistory.RemoveAt(0);
     }
 
