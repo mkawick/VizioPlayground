@@ -18,6 +18,7 @@ public class Visio : MonoBehaviour
     [SerializeField, Range(0, 600)] int numFramesAfterLeavingRoomToHide = 120;
     [SerializeField] bool clearHistory = true;
     [SerializeField] int zoneToSelect = 1;
+    public List<int> _ListOfVisibleZones;
 
     const int outsideZone = -1;
     const int zoneSearchRadius = 8;
@@ -25,7 +26,6 @@ public class Visio : MonoBehaviour
     TinyWizHideableManager _tinyWizPlayerManager;
     IHideableObject _localPlayer;
     Collider[] _collidersTracker;
-    bool _hasFinishedInit = false;
 
     public List<ZoneInfo> ZoneList { get; private set; }
     List<int> zonesThatSeeOutside;
@@ -36,6 +36,10 @@ public class Visio : MonoBehaviour
     void Start()
     {
         InitializeZoneList();
+        if (_ListOfVisibleZones == null)
+            _ListOfVisibleZones = new List<int>();
+        if (_ListOfVisibleZones.Contains(outsideZone) == false)
+            _ListOfVisibleZones.Add(outsideZone);
         _tinyWizPlayerManager = GameObject.FindAnyObjectByType<TinyWizHideableManager>();
     }
 
@@ -162,7 +166,7 @@ public class Visio : MonoBehaviour
     }
     
 
-    private void AddAllObjectsToZones()
+    private void AddNewObjectsToZones()
     {
         var hideables = _tinyWizPlayerManager.NewlySpawnedObjects;
         if (hideables.Count == 0)
@@ -181,7 +185,6 @@ public class Visio : MonoBehaviour
         MakeAllObjectsAwareOfOneAnother();
         ShowInitialObjectsToLocalPlayer();
 
-        //_hasFinishedInit = true;
         _tinyWizPlayerManager.NewlySpawnedObjects.Clear();
     }
 
@@ -207,10 +210,10 @@ public class Visio : MonoBehaviour
 
     void Update()
     {
-        if(_hasFinishedInit == false && _tinyWizPlayerManager && 
+        if (_tinyWizPlayerManager &&
             _tinyWizPlayerManager.HasFinishedInit)
         {
-            AddAllObjectsToZones();
+            AddNewObjectsToZones();
         }
 
         // update everyone's zones
@@ -319,29 +322,29 @@ public class Visio : MonoBehaviour
 
             if (newZoneId == hideable.GetZone())
                 continue;
-            
+            bool isLocalPlayer = hideable == _localPlayer;
             if (hideable.GetZone() != outsideZone)
             {
                 VizZone oldVizZone = GetZone(hideable.GetZone());
                 if (oldVizZone != null)
                 {
-                    InformHidablesThatMyVisibilityHasChanged(hideable, oldVizZone.externalZonesThatSeeMe, false, hideable == _localPlayer);
+                    InformHidablesThatMyVisibilityHasChanged(hideable, oldVizZone.externalZonesThatSeeMe, false, isLocalPlayer);
                 }
             }
             else
             {
-                InformHidablesThatMyVisibilityHasChanged(hideable, new List<int> { outsideZone }, false, hideable == _localPlayer);
+                InformHidablesThatMyVisibilityHasChanged(hideable, _ListOfVisibleZones, false, isLocalPlayer);
             }
 
             if (vizZone != null)
             {
                 hideable.MoveZones(newZoneId, vizZone._ListOfVisibleZones.ToList());
-                InformHidablesThatMyVisibilityHasChanged(hideable, vizZone.externalZonesThatSeeMe, true, hideable == _localPlayer);
+                InformHidablesThatMyVisibilityHasChanged(hideable, vizZone.externalZonesThatSeeMe, true, isLocalPlayer);
             }
             else
             {
-                hideable.MoveZones(newZoneId, new List<int> { outsideZone });
-                InformHidablesThatMyVisibilityHasChanged(hideable, zonesThatSeeOutside , true, hideable == _localPlayer);
+                hideable.MoveZones(newZoneId, _ListOfVisibleZones);
+                InformHidablesThatMyVisibilityHasChanged(hideable, zonesThatSeeOutside , true, isLocalPlayer);
             }
         }
 
@@ -374,6 +377,10 @@ public class Visio : MonoBehaviour
         if (vizZone != null)
         {
             hideable.AddVisibleZones(vizZone.ZoneId, vizZone._ListOfVisibleZones);
+        }
+        else
+        {
+            hideable.AddVisibleZones(zoneToSet, _ListOfVisibleZones.ToArray());
         }
     }
 

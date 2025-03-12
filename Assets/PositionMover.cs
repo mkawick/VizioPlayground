@@ -22,10 +22,10 @@ public class PositionMover : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.Tab))
         {
             int oldLocationIndex = whichLocation;
-            if (Input.GetKeyDown(KeyCode.LeftShift))
+            if (Input.GetKey(KeyCode.LeftShift))
             {
                 whichLocation--; if (whichLocation < 0)
-                { whichLocation = transportLocations.Length; }
+                { whichLocation = transportLocations.Length - 1; }
             }
             else
             {
