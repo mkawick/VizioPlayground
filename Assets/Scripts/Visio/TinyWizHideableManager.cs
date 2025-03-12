@@ -108,7 +108,7 @@ public class TinyWizHideableManager : MonoBehaviour
         spawnedHistory.RemoveAt(0);
     }
 
-    internal void GetAllPlayersInRoom(int zoneId,
+    internal void GetAllPlayersInZone(int zoneId,
         HashSet<int> objectsInZone)
     {
         foreach(var obj in allHidableObjects)

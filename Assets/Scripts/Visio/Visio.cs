@@ -15,7 +15,7 @@ public class Visio : MonoBehaviour
         public Collider collider;
     }
 
-    [SerializeField, Range(0, 600)] int numFramesAfterLeavingRoomToHide = 120;
+    [SerializeField, Range(0, 600)] int numFramesAfterLeavingZoneBeforeHide = 120;
     [SerializeField] bool clearHistory = true;
     [SerializeField] int zoneToSelect = 1;
     public List<int> _ListOfVisibleZones;
@@ -188,25 +188,6 @@ public class Visio : MonoBehaviour
         _tinyWizPlayerManager.NewlySpawnedObjects.Clear();
     }
 
-    private void FindMostLikelyContainingZone(IHideableObject you, LayerMask layerToSearch, int searchRadius, out int zoneToSet, out VizZone vizZone)
-    {
-        List<Collider> colliders = GetCollidersOrderedByDistOnLayer(you.transform.position, searchRadius, layerToSearch);
-
-        Collider innerMostZone = null;
-        zoneToSet = outsideZone;
-        vizZone = null;
-        foreach (var collider in colliders)
-        {
-            // TODO... deal with negative bounds
-            if (collider.bounds.Contains(you.transform.position))// TODO: we need a better comparison
-            {
-                vizZone = collider.GetComponent<VizZone>();
-                zoneToSet = vizZone.ZoneId;
-                innerMostZone = collider;
-                break;// inner most zone
-            }
-        }
-    }
 
     void Update()
     {
@@ -256,7 +237,7 @@ public class Visio : MonoBehaviour
 
             if(history.Count() > 0)
             {
-                hideable.ClearHistory(Time.frameCount - numFramesAfterLeavingRoomToHide);
+                hideable.ClearHistory(Time.frameCount - numFramesAfterLeavingZoneBeforeHide);
             }
         }
     }
@@ -266,13 +247,13 @@ public class Visio : MonoBehaviour
         HashSet<int> objectsInZone = new HashSet<int>();
         var zoneId = hideable.GetZone();
 
-        // ensure the current room is considered
-        _tinyWizPlayerManager.GetAllPlayersInRoom(zoneId, objectsInZone);
+        // ensure the current zone is considered
+        _tinyWizPlayerManager.GetAllPlayersInZone(zoneId, objectsInZone);
         foreach (var zoneThatSeeThisOne in listOfVisibleZones)
         {
             if (zoneId == zoneThatSeeThisOne)// prevent bad setup bug where designer lists a zone in it's visible zones
                 continue;
-            _tinyWizPlayerManager.GetAllPlayersInRoom(zoneThatSeeThisOne, objectsInZone);
+            _tinyWizPlayerManager.GetAllPlayersInZone(zoneThatSeeThisOne, objectsInZone);
         }
         
         var hidableId = hideable.HideableId;
@@ -287,16 +268,16 @@ public class Visio : MonoBehaviour
         }
     }
 
-    List<int> ListOfZonesThatSeeThisOne(int zoneId)
+    List<int> ListOfZones(int zoneIdThatTheySee)
     {
         var list = new List<int>();
-        list.Add(zoneId);
+        list.Add(zoneIdThatTheySee);
         for(int i = 0; i < ZoneList.Count; i++)
         {
             var visibleZones = ZoneList[i].zone._ListOfVisibleZones;
             for (int j = 0; j < visibleZones.Length; j++) 
             {
-                if (visibleZones[j] == zoneId)
+                if (visibleZones[j] == zoneIdThatTheySee)
                 {
                     list.Add(ZoneList[i].zone.ZoneId);
                     break;
@@ -420,10 +401,10 @@ public class Visio : MonoBehaviour
         for (int i = 0; i < ZoneList.Count; i++)
         {
             var zone = ZoneList[i].zone;
-            zone.externalZonesThatSeeMe = ListOfZonesThatSeeThisOne(zone.ZoneId);
+            zone.externalZonesThatSeeMe = ListOfZones(zone.ZoneId);
         }
 
-        zonesThatSeeOutside = ListOfZonesThatSeeThisOne(outsideZone);
+        zonesThatSeeOutside = ListOfZones(outsideZone);
     }
 
     private void ShowInitialObjectsToLocalPlayer()
@@ -445,6 +426,26 @@ public class Visio : MonoBehaviour
             else
             {
                 hideable.Hide();
+            }
+        }
+    }
+
+    private void FindMostLikelyContainingZone(IHideableObject you, LayerMask layerToSearch, int searchRadius, out int zoneToSet, out VizZone vizZone)
+    {
+        List<Collider> colliders = GetCollidersOrderedByDistOnLayer(you.transform.position, searchRadius, layerToSearch);
+
+        Collider innerMostZone = null;
+        zoneToSet = outsideZone;
+        vizZone = null;
+        foreach (var collider in colliders)
+        {
+            // TODO... deal with negative bounds
+            if (collider.bounds.Contains(you.transform.position))// TODO: we need a better comparison
+            {
+                vizZone = collider.GetComponent<VizZone>();
+                zoneToSet = vizZone.ZoneId;
+                innerMostZone = collider;
+                break;// inner most zone
             }
         }
     }

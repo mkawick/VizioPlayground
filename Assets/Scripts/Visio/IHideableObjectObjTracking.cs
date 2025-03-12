@@ -38,9 +38,9 @@ public abstract partial class IHideableObject: MonoBehaviour
         {
             foreach (var zoneId in _zonesISee)
             {
-                _tinyWizHideableManager.GetAllPlayersInRoom(zoneId, objectsISee);
+                _tinyWizHideableManager.GetAllPlayersInZone(zoneId, objectsISee);
             }
-            _tinyWizHideableManager.GetAllPlayersInRoom(_zoneIAmIn, objectsISee);
+            _tinyWizHideableManager.GetAllPlayersInZone(_zoneIAmIn, objectsISee);
             // no need to keep yourself in the list
             objectsISee.Remove(HideableId);
         }
