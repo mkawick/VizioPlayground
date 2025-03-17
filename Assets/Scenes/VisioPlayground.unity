@@ -2777,8 +2777,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 579995233}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.2511788, y: -0.48387825, z: 0.14769101, w: -0.8252021}
-  m_LocalPosition: {x: 2.4410074, y: 9.371137, z: -15.244594}
+  m_LocalRotation: {x: -0.09933522, y: -0.88095546, z: 0.21499337, w: -0.40966812}
+  m_LocalPosition: {x: 2.0357132, y: 7.9183064, z: 3.8322077}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4885,7 +4885,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numFramesAfterLeavingZoneBeforeHide: 120
-  clearHistory: 0
+  clearHistory: 1
   zoneToSelect: 8
   _ListOfVisibleZones: 16000000
   ErrorText: 'OpenField is missing collider
@@ -5922,7 +5922,7 @@ PrefabInstance:
     - target: {fileID: 7658701295548142335, guid: 11c8db76bf5fa6441aa4a38a9c2802cb,
         type: 3}
       propertyPath: '_ListOfVisibleZones.Array.data[0]'
-      value: 14
+      value: -1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

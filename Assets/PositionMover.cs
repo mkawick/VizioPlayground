@@ -14,7 +14,8 @@ public class PositionMover : MonoBehaviour
     {
         inputActions = new PlayerInputActions();
         inputActions.PlayerMovement.Enable();
-        inputActions.PlayerMovement.Interact.performed += Interact_performed;    
+        inputActions.PlayerMovement.Interact.performed += Interact_performed;
+        inputActions.PlayerMovement.Move.performed += Move_performed;
     }
 
     void Update()
@@ -61,4 +62,16 @@ public class PositionMover : MonoBehaviour
 
         Next(int oldLocationIndex, int newLocationIndex)*/
     }
+
+    private void Move_performed(InputAction.CallbackContext obj)
+    {
+      /*  var dir = obj.ReadValue<Vector2>();
+        var forward = cam  transform.forward * -dir.x + transform.right * dir.y;// ; * new Vector3(dir.y, 0, dir.x);
+
+        //var newDir = new Vector3(dir.y, 0, dir.x) * ;
+        transform.position += forward * Time.deltaTime * moveSpeed;*/
+
+        
+    }
+    
 }
