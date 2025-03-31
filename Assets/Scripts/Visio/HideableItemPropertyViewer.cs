@@ -1,10 +1,6 @@
 using Sirenix.OdinInspector;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEditor.SearchService;
 using UnityEngine;
-using static IHideableObject;
 
 public class HideableItemPropertyViewer : MonoBehaviour
 {

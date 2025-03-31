@@ -2,13 +2,14 @@ using Sirenix.Utilities;
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Terresquall;
 
 public class Jumper : MonoBehaviour
 {
-    PlayerInputActions inputActions;
     [SerializeField] Transform player;
     [SerializeField] float jumpImpulse;
-    [SerializeField, Range(0.2f, 8)]
+    [SerializeField] GameObject joystickCanvas;
+    [SerializeField, Range(0.2f, 16)]
     float moveSpeed = 3;
 
     float verticalVelocity = 0;
@@ -18,28 +19,46 @@ public class Jumper : MonoBehaviour
 
     Int32 layerMask;
     bool shouldCheckForGround = false;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    Rigidbody playerRb;
+    float playerHeight = 0;
+    bool jumpPressed;
+
     void Start()
     {
         layerMask = LayerMask.GetMask("walkable");
-      /*  inputActions = new PlayerInputActions();
-        inputActions.PlayerMovement.Enable();
-        inputActions.PlayerMovement.Interact.performed += Interact_performed;
-        inputActions.PlayerMovement.Move.performed += Move_performed;
-        inputActions.PlayerMovement.Jump.performed += Jump_performed;
-        inputActions.PlayerMovement.Slice.performed += PressF_performed;
-        inputActions.PlayerMovement.SelectLevel.performed += PressE_performed;
-        */
+        playerRb = GetComponentInChildren<Rigidbody>();
+        var mesh = GetComponentInChildren<MeshRenderer>();
+        if (mesh == null)
+        {
+            var skinnedMesh = GetComponentInChildren<SkinnedMeshRenderer>();
+            playerHeight = skinnedMesh.bounds.size.y;
+        }
+        else
+        {
+            playerHeight = mesh.bounds.size.y;
+        }
+        jumpPressed = false;
+        if (joystickCanvas)
+            joystickCanvas.SetActive(true);
     }
 
     void Update()
     {
-        CheckKeys();
-        Fall();
-        CheckGround();
+        
+        RaycastSwarm();
+
+        if(Input.GetKeyUp(KeyCode.Keypad0))
+        {
+            Application.targetFrameRate = 10;
+        }
+        if (Input.GetKeyUp(KeyCode.Keypad1))
+        {
+            Application.targetFrameRate = 60;
+        }
     }
 
-    void CheckGround()
+    void CheckGroundDuringFall()
     {
         if (shouldCheckForGround == false)
             return;
@@ -69,94 +88,183 @@ public class Jumper : MonoBehaviour
         if (verticalVelocity != 0)
         {
             transform.position += new Vector3(0, verticalVelocity, 0);
-            verticalVelocity -= 4.9f * Time.deltaTime * gravityMultiplier;
+            verticalVelocity -= 9.8f * Time.deltaTime * gravityMultiplier;
             if (transform.position.y < 0)
             {
                 transform.position = new Vector3(transform.position.x, 0, transform.position.z);
                 verticalVelocity = 0;
             }
             if (verticalVelocity < 0)
+            {
                 shouldCheckForGround = true;
+                //tripleSpeed = true;
+            }
         }
     }
 
-    private void CheckKeys()
+    private void GroundCheckStartFalling()
     {
-        var dirs = Camera.main.transform;
-        Vector3 dir = new Vector3();
+        var raycastPos = transform.position + new Vector3(0, playerHeight * 0.5f, 0);
+        // ramps and such
+        RaycastHit hit;
+        bool hits = Physics.SphereCast(raycastPos, 0.1f, -transform.up, out hit, playerHeight, layerMask);
+        if (hits)
+        {
+            var zeroedHitPoint = new Vector3(transform.position.x, hit.point.y, transform.position.z);
+            // the hit point is rarely directly beneath the character, so it will tend to drift over time
+            var verticalDist = Mathf.Abs(transform.position.y - hit.point.y);
+            if (verticalDist > 0.5) // start falling
+            {
+                verticalVelocity = -0.1f;
+                shouldCheckForGround = true;
+            }
+            else if (verticalDist > 0.03f)// ground
+            {
+                transform.position = zeroedHitPoint;
+            }
+        }
+        else
+        {
+            verticalVelocity = -0.1f;
+            shouldCheckForGround = true;
+        }
+    }
 
-        if(Input.GetKeyDown(KeyCode.Space))
+    void FixedUpdate()
+    {
+        Jump();
+
+        Fall();
+        CheckGroundDuringFall();
+
+        float x = Input.GetAxisRaw("Horizontal");
+        float z = Input.GetAxisRaw("Vertical");
+        x += VirtualJoystick.GetAxis("Horizontal", 16);
+        z += VirtualJoystick.GetAxis("Vertical", 16);
+
+        if (x != 0 || z != 0)
+        {
+            var cameraDir = Camera.main.transform;
+            var forward = new Vector3( cameraDir.forward.x, 0, cameraDir.forward.z );
+            Vector3 dir = x * cameraDir.right + z * forward;
+            transform.rotation = Quaternion.LookRotation(dir);
+            HandleWalls(dir);
+        }
+
+        if (verticalVelocity == 0)
+        {
+            GroundCheckStartFalling();
+        }
+        if (jumpPressed)
         {
             Debug.Log("Jumping");
             verticalVelocity += jumpImpulse;
-
+            jumpPressed = false;
         }
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
+    }
+    public void OnJumpButton()
+    {
+        jumpPressed = true;
+    }
+
+    private void HandleWalls(Vector3 moveDir)
+    {
+        float castDist = 0.3f;
+        var forwardDir = playerRb.transform.forward;
+        var raycastPos = playerRb.transform.position - forwardDir * castDist; // slightly behind
+        var rot = playerRb.transform.rotation;
+
+        float potentialMoveDist = Time.deltaTime * moveSpeed;
+
+        RaycastHit hitInfo;
+        bool hits = Physics.SphereCast(raycastPos, 0.1f, forwardDir, out hitInfo, castDist * 2, layerMask); // a huge distance
+        if (hits)
         {
-            dir = dirs.forward;
+            var intersectingRay = hitInfo.point - raycastPos;// todo : this ray is probably not aligned with the player's feet
+            float hitDist = (intersectingRay).magnitude;
+
+            float angle = Mathf.Rad2Deg * Mathf.Acos(Vector3.Dot(Vector3.up, hitInfo.normal));
+            /*if (angle <= 45)
+            {
+                transform.position = hitInfo.point;
+                verticalVelocity = 0;
+                shouldCheckForGround = false;
+                return;
+            }*/
+            if(angle >45)
+            {
+                return;// walls stop you if the angle is too much
+            }
+
+            if (hitDist < castDist * 2)
+            {
+                var minusHitDir = moveDir - hitInfo.normal * potentialMoveDist;
+                var remainingMoverDir = minusHitDir * potentialMoveDist;// reproject orthagonally
+                bool doesHitPerpendicular = Physics.SphereCast(raycastPos, 0.1f, remainingMoverDir, out hitInfo, castDist * 2, layerMask); // a huge distance
+                if (doesHitPerpendicular)
+                {
+                    /* intersectingRay = hit.point - raycastPos;// todo : this ray is probably not aligned with the player's feet
+                     hitDist = (intersectingRay).magnitude;
+                     if (hitDist < castDist * 2)
+                     {
+                         minusHitDir = raycastPos - hit.point;// actual distance from our center to wall
+                         hitDist = minusHitDir.magnitude;
+                     }*/
+                    return;
+                }
+            }
+            if (hitDist > 0)
+            {
+                transform.position += moveDir * ((hitDist > potentialMoveDist) ? potentialMoveDist : hitDist);
+            }
         }
-        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+        else
         {
-            dir = -dirs.right;
+            transform.position += moveDir * potentialMoveDist;
         }
-        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
+    }
+
+    private void Jump()
+    {
+        if(Input.GetKeyDown(KeyCode.Space))
         {
-            dir = -dirs.forward;
-        }
-        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
-        {
-            dir = dirs.right;
-        }
-
-        if (dir.magnitude != 0)
-        {
-            dir *= moveSpeed * Time.deltaTime;
-            this.transform.position += new Vector3(dir.x, 0, dir.z);
+            jumpPressed = true;
         }
     }
 
-    private void Interact_performed(InputAction.CallbackContext obj)
+    void RaycastSwarm()
     {
-        /*if (obj.control.IsPressed()) // press down
-            return;
+        var pos = playerRb.transform.position;
+        var rot = playerRb.transform.rotation;
+        var dir = playerRb.transform.forward;
 
-        Next(int oldLocationIndex, int newLocationIndex)*/
+        float radius = 0.2f;
+        Vector3 lower = pos - new Vector3(0, radius, 0);
+        Vector3 upper = pos + new Vector3(0, radius, 0);
+        Vector3 left  = pos - playerRb.transform.right * radius;
+        Vector3 right = pos + playerRb.transform.right * radius;
+
+        Debug.DrawLine(pos, pos + dir, Color.red);
+        Debug.DrawLine(lower, dir + lower, Color.gray);
+        Debug.DrawLine(upper, dir + upper, Color.white);
+
+        Debug.DrawLine(left, dir + left, Color.blue);
+        Debug.DrawLine(right, dir + right, Color.blue);
+
+        var center = transform.position;
+        var dirDown = center - transform.up * 4;
+
+        Debug.DrawLine(center, dirDown, Color.green);
     }
 
-    private void Move_performed(InputAction.CallbackContext obj)
+    private void OnDrawGizmos()
     {
-          var dir = obj.ReadValue<Vector2>();
-          var forward = transform.forward * -dir.x + transform.right * dir.y;// ; * new Vector3(dir.y, 0, dir.x);
-
-          //var newDir = new Vector3(dir.y, 0, dir.x) * ;
-          transform.position += forward * Time.deltaTime * moveSpeed;
-
-
+        float radius = 0.2f;
+        var center = transform.position;
+        var dirDown = center - transform.up * 4;
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(dirDown, radius);
     }
 
-    private void Jump_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
-    {
-        Debug.Log("Jumping");
-        verticalVelocity += jumpImpulse;// * gravityMultiplier;
-        //Jump(transform.forward);
-    }
-    private void PressF_performed(InputAction.CallbackContext obj)
-    {
-        //PerformOverlapSphereHit();
-    }
-    private void PressE_performed(InputAction.CallbackContext obj)
-    {
-        //PerformOverlapSphereHit();
-       // PerformRaycastHit();
-    }
-
-    // Update is called once per frame
-
-    void OnCollisionEnter(Collision collision)
-    {
-        verticalVelocity = 0;
-        Debug.Log($"Collided {collision.body.name}");
-        //isGrounded = true;
-    }
 }
 

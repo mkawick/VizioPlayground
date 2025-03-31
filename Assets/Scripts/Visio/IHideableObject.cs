@@ -1,44 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public abstract partial class IHideableObject: MonoBehaviour
 {
-    Renderer[] _meshRenderer;
     static protected TinyWizHideableManager _tinyWizHideableManager;
-    bool _isVisible;
 
-    Vector3 _lastPosition;
-    bool _visibilityDirty;
+
+    [SerializeField] public Transform root;
+    [Header(
+        "This will ignore previous setup and search for renders on start. Disable this if you want to precache complex structures")]
+    [SerializeField] bool alwaysSearchForRendersOnStart = true;
+
+    [SerializeField] protected Renderer[] _meshRenderer;
+
+    protected bool _isVisible;
+    protected Vector3 _lastPosition;
+    protected bool _visibilityDirty;
+    public bool shouldReconsiderVisibilityOnSameZones { get; internal set; }
+    protected int invisioStack = 0;
+    protected int superVisionStack = 0;
+    public Vector3 positionToConsider => root.position;
+
     public int HideableId { get; set; }
-
-    int invisioStack = 0;
-    int superVisionStack = 0;
 
     public bool VisibilityDirty { get { return _visibilityDirty; } }
     public void ClearDirty() { _visibilityDirty = false; }
 
     private void Start()
     {
-        _visibilityDirty = false;
+        if (root == null)
+        {
+            root = transform;
+        }
+
+        _visibilityDirty = true;
+        shouldReconsiderVisibilityOnSameZones = true;
         _isVisible = true;
-        _lastPosition = transform.position;
+        _lastPosition = root.position;
 
-        if (_tinyWizHideableManager == null)
-        {
-            _tinyWizHideableManager = GameObject.FindAnyObjectByType<TinyWizHideableManager>();
-        }
-        _tinyWizHideableManager.Register(this);
-
-        _meshRenderer = GetComponentsInChildren<Renderer>();
-        if (_meshRenderer.Length > 0)
-        {
-            _isVisible = _meshRenderer[0].enabled;
-        }
-        else
-        {
-            Debug.Log($"no renderer on {this.name}");
-        }
+        FindRenderersInChildren(alwaysSearchForRendersOnStart, transform);
     }
     void OnDestroy()
     {
@@ -47,18 +46,40 @@ public abstract partial class IHideableObject: MonoBehaviour
             _tinyWizHideableManager.Remove(this);
         }
     }
-    private void Update()
+
+    void CheckDirty()
     {
-        if(!Observant)
+        ValidateRegister();
+
+        if (!Observant)
         {
             return;
         }
-        var movedDist = (transform.position - _lastPosition).sqrMagnitude;
+
+        var movedDist = (root.position - _lastPosition).sqrMagnitude;
         if (movedDist > 0.01f)
         {
-            _lastPosition = transform.position;
+            _lastPosition = root.position;
             _visibilityDirty = true;
         }
+    }
+    // TODO:Ideally this is done on start, however we are currently having initialization issues 
+    void ValidateRegister()
+    {
+        if (HideableId == 0)
+        {
+            if (_tinyWizHideableManager == null)
+            {
+                _tinyWizHideableManager = GameObject.FindAnyObjectByType<TinyWizHideableManager>();
+            }
+
+            _tinyWizHideableManager?.Register(this);
+        }
+    }
+
+    private void Update()
+    {
+        CheckDirty();
     }
 
     
@@ -79,12 +100,12 @@ public abstract partial class IHideableObject: MonoBehaviour
         _isVisible = false; 
         MakeMeshVisible(_isVisible); 
     }
-    public bool CanShow() { return true; }
-    public bool CanHide() { return true; }
+ /*   public bool CanShow() { return true; }
+    public bool CanHide() { return true; }*/
 
     public bool IsVisible() { return _isVisible; }
 
-    public void MakeMeshVisible(bool visible) 
+    public virtual void MakeMeshVisible(bool visible) 
     {
         if (_meshRenderer == null)
             return;
@@ -107,5 +128,15 @@ public abstract partial class IHideableObject: MonoBehaviour
         if (superVisionStack == 0)
             return false;
         return true;
+    }
+
+    protected virtual void FindRenderersInChildren(bool invalidatePrevious, Transform search)
+    {
+        if (_meshRenderer == null
+            || _meshRenderer.Length == 0
+            || invalidatePrevious)
+        {
+            _meshRenderer = search.GetComponentsInChildren<Renderer>(true);
+        }
     }
 }

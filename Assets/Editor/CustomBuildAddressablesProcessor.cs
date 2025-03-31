@@ -22,7 +22,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR && WINDOWS_PLATFORM
 [InitializeOnLoad]
 class UnityEditorStartup
 {
@@ -212,6 +212,7 @@ public class AddressableAssetSettingsAccessor : AddressableAssetSettingsDefaultO
         return settings;
     }
 }
+
 
 
 

@@ -3,14 +3,18 @@ using UnityEngine;
 using TMPro;
 using System;
 using System.Collections.Generic;
+using UnityEngine.Serialization;
 
 public class VizZone : MonoBehaviour
 {
+    [FormerlySerializedAs("_ListOfVisibleZones")]
+    public int[] visibleZonesICanSee;
+    public int[] hiddenZones;
+
     public TextMeshProUGUI text;
     public int ZoneId { get { if (_OverrideZoneId != 0) return _OverrideZoneId; return int.Parse(text.text); } }
     public int _OverrideZoneId;
     public Material highlightMaterial;
-    public int[] _ListOfVisibleZones;
     internal List<int> externalZonesThatSeeMe;
     bool showSelection;
 

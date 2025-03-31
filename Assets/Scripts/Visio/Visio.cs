@@ -43,6 +43,7 @@ public class Visio : MonoBehaviour
         _tinyWizPlayerManager = GameObject.FindAnyObjectByType<TinyWizHideableManager>();
     }
 
+#if UNITY_EDITOR 
     [GUIColor(0.8f, 0.9f, 0.2f)]
     [Button(ButtonSizes.Medium)]
     void ConnectLinesForZoneIdInScene()
@@ -157,6 +158,9 @@ public class Visio : MonoBehaviour
     [Multiline(10)]
     public string ErrorText;
 
+    
+#endif
+
     void ClearHighlightOnZones(VizZone[] zones)
     {
         /* foreach (var zone in zones)
@@ -164,7 +168,6 @@ public class Visio : MonoBehaviour
              zone.ShowSelected(false);
          }*/
     }
-    
 
     private void AddNewObjectsToZones()
     {
@@ -274,7 +277,7 @@ public class Visio : MonoBehaviour
         list.Add(zoneIdThatTheySee);
         for(int i = 0; i < ZoneList.Count; i++)
         {
-            var visibleZones = ZoneList[i].zone._ListOfVisibleZones;
+            var visibleZones = ZoneList[i].zone.visibleZonesICanSee;
             for (int j = 0; j < visibleZones.Length; j++) 
             {
                 if (visibleZones[j] == zoneIdThatTheySee)
@@ -319,7 +322,7 @@ public class Visio : MonoBehaviour
 
             if (vizZone != null)
             {
-                hideable.MoveZones(newZoneId, vizZone._ListOfVisibleZones.ToList());
+                hideable.MoveZones(newZoneId, vizZone.visibleZonesICanSee.ToList());
                 InformHidablesThatMyVisibilityHasChanged(hideable, vizZone.externalZonesThatSeeMe, true, isLocalPlayer);
             }
             else
@@ -357,7 +360,7 @@ public class Visio : MonoBehaviour
         hideable.SetZone(zoneToSet);
         if (vizZone != null)
         {
-            hideable.AddVisibleZones(vizZone.ZoneId, vizZone._ListOfVisibleZones);
+            hideable.AddVisibleZones(vizZone.ZoneId, vizZone.visibleZonesICanSee);
         }
         else
         {
@@ -396,6 +399,7 @@ public class Visio : MonoBehaviour
 
             ZoneList.Add(new ZoneInfo { zone = zone, collider = collider });
         }
+
         ClearHighlightOnZones(zones);
 
         for (int i = 0; i < ZoneList.Count; i++)

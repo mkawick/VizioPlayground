@@ -4,12 +4,19 @@ using UnityEngine;
 public abstract partial class IHideableObject: MonoBehaviour
 {
     int _zoneIAmIn;
+    int _zoneIWasIn;
     List<int> _zonesISee = new List<int>();
 
     public List<int> ZonesISee => _zonesISee;
 
-    public void SetZone(int zone) { _zoneIAmIn = zone; AddVisibleZone(_zoneIAmIn); }
+    public void SetZone(int zone)
+    {
+        _zoneIWasIn = _zoneIAmIn;
+        _zoneIAmIn = zone;
+        AddVisibleZone(_zoneIAmIn);
+    }
     public int GetZone() { return _zoneIAmIn; }
+    public int GetPreviousZone() { return _zoneIWasIn; }
 
     public void AddVisibleZone(int zone) { if(!_zonesISee.Contains(zone)) _zonesISee.Add(zone); }
     public void AddVisibleZones(int zoneId, int [] zones) 

@@ -1,7 +1,9 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class HideablePlayerController : IHideableObject
+//[assembly: BindTypeNameToType("HideablePlayerController", typeof(HideablePlayerController))]
+public class HideablePlayerController : HideableCharacterController
 {
     public override void Hide() { }
     public override bool IsLocalPlayer() { return true; }
@@ -48,25 +50,5 @@ public class HideablePlayerController : IHideableObject
                 break;
             }
         }
-    }
-
-    public override bool HasVisibilityEffect()
-    {
-        throw new NotImplementedException();
-    }
-
-    public override int ApplyVisibilityEffect(int lengthInMs, bool isInvisible)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void CancelEffect(int id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override void ClearAllEffects()
-    {
-        throw new NotImplementedException();
     }
 }
