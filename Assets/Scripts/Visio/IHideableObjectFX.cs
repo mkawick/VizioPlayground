@@ -1,11 +1,19 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class VisibilityZoneDefinition 
+public struct VisibilityZoneDefinition
 {
+    public string key;
     public float speed;
     public float visibility;
     public float range;
+    public static VisibilityZoneDefinition DefaultDefinition =>
+            new VisibilityZoneDefinition()
+            {
+                key = "Default",
+                visibility = 1.0f,
+                speed = 1.0f
+            };
 
 }
 

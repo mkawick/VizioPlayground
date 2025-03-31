@@ -19,7 +19,7 @@ public abstract partial class IHideableObject: MonoBehaviour
     public int GetPreviousZone() { return _zoneIWasIn; }
 
     public void AddVisibleZone(int zone) { if(!_zonesISee.Contains(zone)) _zonesISee.Add(zone); }
-    public void AddVisibleZones(int zoneId, int [] zones) 
+    public void AddVisibleZones(int zoneId, List<int> zones) 
     {
         if (!_zonesISee.Contains(zoneId))
         {

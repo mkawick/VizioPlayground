@@ -48,6 +48,9 @@ public class HideableCharacterController : IHideableObject
 
     public override void ApplyZoneSettings(VisibilityZoneDefinition definition)
     {
+        if (puppet == null)
+            return;
+
         var puppetMainCharacter = puppet.mainCharacter;
 
         if (definition.speed < 1)

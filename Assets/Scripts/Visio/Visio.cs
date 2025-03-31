@@ -5,6 +5,7 @@ using System.Linq;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 
 public class Visio : MonoBehaviour
@@ -15,35 +16,91 @@ public class Visio : MonoBehaviour
         public Collider collider;
     }
 
-    [SerializeField, Range(0, 600)] int numFramesAfterLeavingZoneBeforeHide = 120;
-    [SerializeField] bool clearHistory = true;
-    [SerializeField] int zoneToSelect = 1;
-    public List<int> _ListOfVisibleZones;
+    const int OUTSIDE_ZONEID = -1;
+    const int ZONE_SEARCH_RADIUS = 8;
 
-    const int outsideZone = -1;
-    const int zoneSearchRadius = 8;
-    LayerMask _layerToSearch;
+    public List<ZoneInfo> ZoneList { get; private set; }
+
+    [SerializeField, Range(0, 600)] int numFramesAfterLeavingZoneBeforeHide = 120;
+    [SerializeField, Range(0, 600)] private int gameplayRulesFrequency = 10;
+    [SerializeField] bool clearHistoryOnMoveFlag = true;
+    [SerializeField] bool waitForArenaToStart = false;
+    [SerializeField] int debugZone = 1;
+
+    [FormerlySerializedAs("_ListOfVisibleZones")]
+    public List<int> _zonesThatSeeOutside;
+
+    [ShowInInspector] LayerMask _layerToSearch;
+
     TinyWizHideableManager _tinyWizPlayerManager;
     IHideableObject _localPlayer;
     Collider[] _collidersTracker;
-
-    public List<ZoneInfo> ZoneList { get; private set; }
-    List<int> zonesThatSeeOutside;
-
+    Dictionary<Collider, VizZone> _colliderToZoneMap = new();
     
+    private bool hasFinishedInit = false;
+    private Dictionary<int, HideableZoneGroup> hideableZones;
+
 
     //----------------------------------------------------
     void Start()
     {
-        InitializeZoneList();
-        if (_ListOfVisibleZones == null)
-            _ListOfVisibleZones = new List<int>();
-        if (_ListOfVisibleZones.Contains(outsideZone) == false)
-            _ListOfVisibleZones.Add(outsideZone);
-        _tinyWizPlayerManager = GameObject.FindAnyObjectByType<TinyWizHideableManager>();
+        hideableZones = new Dictionary<int, HideableZoneGroup>();
+        InitializeVisio();
+
+        hasFinishedInit = true;
     }
 
+
 #if UNITY_EDITOR 
+    [Button(ButtonSizes.Medium)]
+    void InitializeVisio()
+    {
+        Debug.Log("Visio method InitializeVisio called");
+
+        if (_tinyWizPlayerManager != null)
+        {
+            Debug.LogWarning("Visio already Initialized");
+
+            return;
+        }
+
+        InitializeZoneList();
+
+        if (_zonesThatSeeOutside == null)
+            _zonesThatSeeOutside = new List<int>();
+        if (_zonesThatSeeOutside.Contains(OUTSIDE_ZONEID) == false)
+            _zonesThatSeeOutside.Add(OUTSIDE_ZONEID);
+
+        _tinyWizPlayerManager = FindAnyObjectByType<TinyWizHideableManager>();
+
+        InitializeHiddenZones();
+    }
+
+    [GUIColor(0, 1, 0.2f)]
+    [Button(ButtonSizes.Medium)]
+    void GrabOutsideVisibleZones()
+    {
+        HashSet<int> zonesIds = new();
+        var zones = GameObject.FindObjectsOfType<VizZone>();
+        foreach (var zone in zones)
+        {
+            switch (zone.type)
+            {
+                case VizZoneTag.Doorway:
+                case VizZoneTag.Roof:
+                    if (zone.visibleZonesICanSee.Contains(OUTSIDE_ZONEID))
+                    {
+                        zonesIds.Add(zone.ZoneId);
+                    }
+                    break;
+            }
+        }
+        _zonesThatSeeOutside = zonesIds.ToList();
+#if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+#endif
+    }
+
     [GUIColor(0.8f, 0.9f, 0.2f)]
     [Button(ButtonSizes.Medium)]
     void ConnectLinesForZoneIdInScene()
@@ -52,7 +109,7 @@ public class Visio : MonoBehaviour
         List<GameObject> foundZone = new List<GameObject>();
         foreach (var zone in zones)
         {
-            if (zone.ZoneId == zoneToSelect)
+            if (zone.ZoneId == debugZone)
             {
                 foundZone.Add(zone.gameObject);
             }
@@ -84,7 +141,7 @@ public class Visio : MonoBehaviour
         List<GameObject> foundZone = new List<GameObject>();
         foreach (var zone in zones)
         {
-            if (zone.ZoneId == zoneToSelect)
+            if (zone.ZoneId == debugZone)
             {
                 foundZone.Add(zone.gameObject);
             }
@@ -107,8 +164,8 @@ public class Visio : MonoBehaviour
         Material anyHighlight = null;
         foreach (var zone in zones)
         {
-            if (zone._OverrideZoneId > highestZoneId)
-                highestZoneId = zone._OverrideZoneId + 1;
+            if (zone.ZoneId > highestZoneId)
+                highestZoneId = zone.ZoneId + 1;
             zone.gameObject.layer = layerId;
             if(anyHighlight == null)
             {
@@ -129,10 +186,10 @@ public class Visio : MonoBehaviour
                 continue;
             numModified++;
             var newComp = child.gameObject.AddComponent<VizZone>();
-            newComp._OverrideZoneId = highestZoneId++;
+            newComp.ZoneId = highestZoneId++;
             newComp.highlightMaterial = anyHighlight;
             child.gameObject.layer = layerId;
-            ErrorText += $"{child.name} added VizZone comp id={newComp._OverrideZoneId}\n";
+            ErrorText += $"{child.name} added VizZone comp id={newComp.ZoneId}\n";
         }       
     }
     [GUIColor(0.4f, 0.4f, 0.8f)]
@@ -158,15 +215,54 @@ public class Visio : MonoBehaviour
     [Multiline(10)]
     public string ErrorText;
 
-    
 #endif
 
-    void ClearHighlightOnZones(VizZone[] zones)
+    void InitializeHiddenZones()
     {
-        /* foreach (var zone in zones)
-         {
-             zone.ShowSelected(false);
-         }*/
+        foreach(var zone in ZoneList)
+        {
+            if (zone.zone.hiddenZones != null && zone.zone.hiddenZones.Length > 0)
+            {
+                HideableZoneGroup group;
+                int parentZoneId = zone.zone.ZoneId;
+                if (hideableZones.ContainsKey(parentZoneId) == false)
+                {
+                    group = new HideableZoneGroup();
+                    group.ZoneId = parentZoneId;
+                    hideableZones.Add(parentZoneId, group);
+                }
+                else
+                {
+                    group = hideableZones[parentZoneId];
+                }
+
+                foreach (int zoneId in zone.zone.hiddenZones)
+                {
+                    var hiddenZones = GetZones(zoneId);
+                    if (hiddenZones.Count == 0)
+                        continue;
+                    // auto add roofs to visible outside 
+                    if (_zonesThatSeeOutside.Contains(zoneId) == false)
+                    {
+                        _zonesThatSeeOutside.Add(zoneId);
+                    }
+
+                    foreach (var hiddenZone in hiddenZones)
+                    {
+                        if (hiddenZone.ZoneHider == null)
+                        {
+                            hiddenZone.ZoneHider = group;
+                        }
+                        group.AddZone(hiddenZone);
+                    }
+
+                }
+            }
+        }
+        foreach(var zone in hideableZones.Values)
+        {
+            zone.Init();
+        }
     }
 
     private void AddNewObjectsToZones()
@@ -202,7 +298,6 @@ public class Visio : MonoBehaviour
 
         // update everyone's zones
         // save a list of those who have moved
-        var movables = _tinyWizPlayerManager.AttentiveObjects;
         UpdateZonesOfMovedItems();
 
         // each hidable saves the list of hidables that they used to know (used to notify later) ... only those that Observe
@@ -210,6 +305,30 @@ public class Visio : MonoBehaviour
 
         // clear old visibility from each player
         HideObjectsFromObjectsInHistory();
+
+        CheckForDistancesForLocalCharacter();
+    }
+
+    private void CheckForDistancesForLocalCharacter()
+    {
+        if (_localPlayer == null)
+        {
+            return;
+        }
+
+        foreach (var objId in _localPlayer.ObjectsISee)
+        {
+            if (!_tinyWizPlayerManager.AllObjects.TryGetValue(objId, out IHideableObject other))
+            {
+                continue;
+            }
+
+            var shouldShowLocallyUsingGameplayRules = false;// _tinyWizPlayerManager.ShouldShowLocallyUsingGameplayRules(_localPlayer, other);
+            if (other.IsVisible() != shouldShowLocallyUsingGameplayRules)
+            {
+                other.shouldReconsiderVisibilityOnSameZones = true;
+            }
+        }
     }
 
     private void HideMeshesForLocalPlayer(IHideableObject hideable, 
@@ -230,7 +349,7 @@ public class Visio : MonoBehaviour
 
     private void HideObjectsFromObjectsInHistory()
     {
-        if (clearHistory == false)
+        if (clearHistoryOnMoveFlag == false)
             return;
 
         var hideables = _tinyWizPlayerManager.AttentiveObjects;
@@ -245,7 +364,7 @@ public class Visio : MonoBehaviour
         }
     }
 
-    private void InformHidablesThatMyVisibilityHasChanged(IHideableObject hideable, List<int> listOfVisibleZones, bool makeVisible, bool changeMeshState)
+    private void InformHidablesThatMyVisibilityHasChanged(IHideableObject hideable, List<int> listOfVisibleZones, bool makeVisible)
     {
         var zoneId = hideable.GetZone();        
         var objectsInZone = GrabAllCharactersInZones(zoneId, listOfVisibleZones);
@@ -266,7 +385,7 @@ public class Visio : MonoBehaviour
                 if (hasInvisoOn == true)
                     newVisibilityState = false;
 
-                ChangeVisibility(makeVisible, newObj, hidableId, changeMeshState);
+                ChangeVisibility(makeVisible, newObj, hidableId);
             }
         }
     }
@@ -275,10 +394,12 @@ public class Visio : MonoBehaviour
     {
         var list = new List<int>();
         list.Add(zoneIdThatTheySee);
+
         for(int i = 0; i < ZoneList.Count; i++)
         {
             var visibleZones = ZoneList[i].zone.visibleZonesICanSee;
-            for (int j = 0; j < visibleZones.Length; j++) 
+
+            for (int j = 0; j < visibleZones.Count; j++) 
             {
                 if (visibleZones[j] == zoneIdThatTheySee)
                 {
@@ -290,65 +411,154 @@ public class Visio : MonoBehaviour
         return list;
     }
 
+    private void HandleMoveZone(int previousZoneId, IHideableObject attentive, VizZone vizZone, int newZoneId)
+    {
+        if (previousZoneId != OUTSIDE_ZONEID)
+        {
+            VizZone oldVizZone = GetZone(previousZoneId);
+
+            if (oldVizZone != null)
+            {
+                InformHidablesThatMyVisibilityHasChanged(attentive, oldVizZone.externalZonesThatSeeMe, false);
+            }
+        }
+        else
+        {
+            InformHidablesThatMyVisibilityHasChanged(attentive, _zonesThatSeeOutside, false);
+        }
+
+        if (vizZone != null)
+        {
+            attentive.MoveZones(newZoneId, vizZone.visibleZonesICanSee);
+            attentive.ApplyZoneSettings(vizZone.definition);
+            InformHidablesThatMyVisibilityHasChanged(attentive, vizZone.externalZonesThatSeeMe, true);
+        }
+        else
+        {
+            if (newZoneId != OUTSIDE_ZONEID)
+            {
+                Debug.LogError($"entering a zone that doesn't exist. newZoneId={newZoneId}");
+            }
+
+            attentive.MoveZones(newZoneId, _zonesThatSeeOutside);
+            attentive.ApplyZoneSettings(VisibilityZoneDefinition.DefaultDefinition);
+            InformHidablesThatMyVisibilityHasChanged(attentive, _zonesThatSeeOutside, true);
+        }
+    }
+
     void UpdateZonesOfMovedItems()
     {
-        var hideables = _tinyWizPlayerManager.AttentiveObjects;
-        foreach (var hideable in hideables.Values)
+        var attentiveObjects = _tinyWizPlayerManager.AttentiveObjects;
+        bool didSomethingMove = false;
+
+        foreach (var attentive in attentiveObjects.Values)
         {
-            if (hideable.VisibilityDirty == false)
+            if (attentive.VisibilityDirty == false)
                 continue;
 
-            hideable.ClearDirty();
+            attentive.ClearDirty();
 
             int newZoneId;
             VizZone vizZone;
-            FindMostLikelyContainingZone(hideable, _layerToSearch, zoneSearchRadius, out newZoneId, out vizZone);
+            FindMostLikelyContainingZone(
+                you: attentive,
+                layerToSearch: _layerToSearch,
+                searchRadius: ZONE_SEARCH_RADIUS,
+                out newZoneId,
+                out vizZone);
 
-            if (newZoneId == hideable.GetZone())
+            var previousZoneId = attentive.GetZone();
+            if (newZoneId == previousZoneId)
+            {
+                didSomethingMove = attentive.shouldReconsiderVisibilityOnSameZones;
                 continue;
-            bool isLocalPlayer = hideable == _localPlayer;
-            if (hideable.GetZone() != outsideZone)
-            {
-                VizZone oldVizZone = GetZone(hideable.GetZone());
-                if (oldVizZone != null)
-                {
-                    InformHidablesThatMyVisibilityHasChanged(hideable, oldVizZone.externalZonesThatSeeMe, false, isLocalPlayer);
-                }
-            }
-            else
-            {
-                InformHidablesThatMyVisibilityHasChanged(hideable, _ListOfVisibleZones, false, isLocalPlayer);
             }
 
-            if (vizZone != null)
+            bool isLocalPlayer = attentive == _localPlayer;
+            HandleMoveZone(previousZoneId, attentive, vizZone, newZoneId);
+            if(isLocalPlayer)
             {
-                hideable.MoveZones(newZoneId, vizZone.visibleZonesICanSee.ToList());
-                InformHidablesThatMyVisibilityHasChanged(hideable, vizZone.externalZonesThatSeeMe, true, isLocalPlayer);
+                HandleHiddenZones(newZoneId, previousZoneId);
             }
-            else
-            {
-                hideable.MoveZones(newZoneId, _ListOfVisibleZones);
-                InformHidablesThatMyVisibilityHasChanged(hideable, zonesThatSeeOutside , true, isLocalPlayer);
-            }
+            didSomethingMove = true;
         }
 
         // show visible 
-        if (_localPlayer)
+        if (_localPlayer && didSomethingMove)
         {
             _localPlayer.ShowAllVisibleItems();
         }
     }
 
-    List<IHideableObject> TrackHidablesInZones(List<int> zoneIds)
+    private void HandleHiddenZones(int newZoneId, int previousZoneId)
     {
-        List<IHideableObject> subset = new List<IHideableObject>();
-        var hideables = _tinyWizPlayerManager.AllObjects;
-        foreach(var hidable in hideables.Values)
+        if (hideableZones.ContainsKey(previousZoneId))
         {
-            if (hidable.IsInZones(zoneIds))
-                subset.Add(hidable);
+            var prevZone = hideableZones[previousZoneId];
+            prevZone.ZoneShow();
         }
-        return subset;
+
+        if (hideableZones.ContainsKey(newZoneId))
+        {
+            var nextZone = hideableZones[newZoneId];
+            nextZone.ZoneHide();
+        }
+    }
+
+    //TODO: we better move this out of Visio
+    bool CheckDistancesOnly(IHideableObject attentive)
+    {
+        bool foundSomething = false;
+        foreach (var otherObjId in attentive.ObjectsISee)
+        {
+            bool becameInvisible = false;
+            var otherObject = _tinyWizPlayerManager.AllObjects[otherObjId];
+            var dist = Vector3.Distance(otherObject.transform.position, attentive.transform.position);
+            if (dist > attentive.normalVisionRange)
+            {
+                becameInvisible = true;
+            }
+            else if (dist > attentive.restrictedVisionRange)
+            {
+                becameInvisible = !otherObject.IsInZone(attentive.GetZone());
+            }
+
+            if (becameInvisible)
+            {
+                attentive.ObjectBecameInvisible(otherObjId);
+                foundSomething = true;
+            }
+        }
+
+        var last = attentive.objectsIUsedToSee.LastOrDefault()._objectsISee;
+
+        foreach (var historical in last)
+        {
+            var obj = _tinyWizPlayerManager.AllObjects[historical];
+
+            if (obj.IsVisible())
+            {
+                continue;
+            }
+            bool becameVisible = false;
+            var dist = Vector3.Distance(obj.transform.position, attentive.transform.position);
+            if (dist < attentive.normalVisionRange)
+            {
+                becameVisible = true;
+            }
+            else if (dist < attentive.restrictedVisionRange)
+            {
+                becameVisible = !obj.IsInZone(attentive.GetZone());
+            }
+
+            if (becameVisible)
+            {
+                attentive.ObjectBecameVisible(historical);
+                foundSomething = true;
+            }
+        }
+
+        return foundSomething;
     }
 
     private void SetInitialZone(IHideableObject hideable)
@@ -356,7 +566,7 @@ public class Visio : MonoBehaviour
         int zoneToSet;
         VizZone vizZone;
 
-        FindMostLikelyContainingZone(hideable, _layerToSearch, zoneSearchRadius, out zoneToSet, out vizZone);
+        FindMostLikelyContainingZone(hideable, _layerToSearch, ZONE_SEARCH_RADIUS, out zoneToSet, out vizZone);
         hideable.SetZone(zoneToSet);
         if (vizZone != null)
         {
@@ -364,7 +574,7 @@ public class Visio : MonoBehaviour
         }
         else
         {
-            hideable.AddVisibleZones(zoneToSet, _ListOfVisibleZones.ToArray());
+            hideable.AddVisibleZones(zoneToSet, _zonesThatSeeOutside);
         }
     }
 
@@ -400,19 +610,20 @@ public class Visio : MonoBehaviour
             ZoneList.Add(new ZoneInfo { zone = zone, collider = collider });
         }
 
-        ClearHighlightOnZones(zones);
-
         for (int i = 0; i < ZoneList.Count; i++)
         {
             var zone = ZoneList[i].zone;
             zone.externalZonesThatSeeMe = ListOfZones(zone.ZoneId);
         }
 
-        zonesThatSeeOutside = ListOfZones(outsideZone);
+        //_zonesThatSeeOutside = ListOfZones(OUTSIDE_ZONEID);
     }
 
     private void ShowInitialObjectsToLocalPlayer()
     {
+        if (_localPlayer == null)
+            return;
+
         var hideables = _tinyWizPlayerManager.AllObjects;
 
         // this is the most efficient way to do this
@@ -434,12 +645,31 @@ public class Visio : MonoBehaviour
         }
     }
 
+    VizZone GetOrCacheVizZone(Collider collider, VizZone vizZone)
+    {
+        if (!_colliderToZoneMap.TryGetValue(collider, out vizZone))
+        {
+            vizZone = collider.GetComponent<VizZone>();
+
+            if (vizZone == null)
+            {
+                Debug.LogWarning("[VISIO] Collider without VizZone", collider.gameObject);
+            }
+            else
+            {
+                _colliderToZoneMap.Add(collider, vizZone);
+            }
+        }
+
+        return vizZone;
+    }
+
     private void FindMostLikelyContainingZone(IHideableObject you, LayerMask layerToSearch, int searchRadius, out int zoneToSet, out VizZone vizZone)
     {
         List<Collider> colliders = GetCollidersOrderedByDistOnLayer(you.transform.position, searchRadius, layerToSearch);
 
         Collider innerMostZone = null;
-        zoneToSet = outsideZone;
+        zoneToSet = OUTSIDE_ZONEID;
         vizZone = null;
         foreach (var collider in colliders)
         {
@@ -460,12 +690,15 @@ public class Visio : MonoBehaviour
 
         // ensure the current zone is considered
         _tinyWizPlayerManager.GetAllPlayersInZone(zoneId, objectsInZone);
+
         foreach (var zoneThatSeeThisOne in listOfVisibleZones)
         {
             if (zoneId == zoneThatSeeThisOne)// prevent bad setup bug where designer lists a zone in it's visible zones
                 continue;
+
             _tinyWizPlayerManager.GetAllPlayersInZone(zoneThatSeeThisOne, objectsInZone);
         }
+
         return objectsInZone;
     }
 
@@ -478,8 +711,18 @@ public class Visio : MonoBehaviour
         }
         return null;
     }
+    List<VizZone> GetZones(int zoneId)
+    {
+        List<VizZone> returnList = new();
+        foreach (var zone in ZoneList)
+        {
+            if (zone.zone.ZoneId == zoneId)
+                returnList.Add( zone.zone);
+        }
+        return returnList;
+    }
 
-    private void ChangeVisibility(bool makeVisible, IHideableObject newObj, int hidableId, bool changeMeshState)
+    private void ChangeVisibility(bool makeVisible, IHideableObject newObj, int hidableId)
     {
         if (makeVisible)
         {
@@ -490,4 +733,5 @@ public class Visio : MonoBehaviour
             newObj.ObjectBecameInvisible(hidableId);
         }
     }
+
 }
