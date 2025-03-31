@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 //[assembly: BindTypeNameToType("HideablePlayerController", typeof(HideablePlayerController))]
-public class HideablePlayerController : HideableCharacterController
+public class HideableFocusedPlayer : HideableCharacterController
 {
     public override void Hide() { }
     public override bool IsLocalPlayer() { return true; }
