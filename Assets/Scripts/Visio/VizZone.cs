@@ -29,7 +29,7 @@ public class VizZone : MonoBehaviour
     public VizZoneTag type => _zoneType;
     bool showSelection;
 
-    [SerializeField] public Transform root;
+    [SerializeField] public Transform optionalRoot;
 
     public int[] hiddenZones;
 
@@ -56,8 +56,8 @@ public class VizZone : MonoBehaviour
         }
         showSelection = false;
 
-        if (root == null)
-            root = this.transform;
+        if (optionalRoot == null)
+            optionalRoot = this.transform;
     }
 
     private Color GetGizmoColor(VizZoneTag vizZoneTag)

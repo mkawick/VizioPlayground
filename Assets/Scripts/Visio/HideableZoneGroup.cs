@@ -7,6 +7,7 @@ public class HideableZoneGroup
     public int ZoneId { get; set; }
     public List<VizZone> ContainingZones = new();
     protected List<Renderer> _meshRenderers;
+
     public void Init()
 	{
         if(_meshRenderers == null)
@@ -14,7 +15,7 @@ public class HideableZoneGroup
 
         foreach (var vizZone in ContainingZones)
         {
-            var renderers = vizZone.root.GetComponentsInChildren<Renderer>(true);
+            var renderers = vizZone.optionalRoot.GetComponentsInChildren<Renderer>(true);
             foreach (var renderer in renderers)
             {
                 _meshRenderers.Add(renderer);
