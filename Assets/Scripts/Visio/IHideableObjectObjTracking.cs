@@ -10,12 +10,14 @@ public abstract partial class IHideableObject: MonoBehaviour
         public float _timestamp;
 
     }
+
+    // TODO should be private
+    public Queue<HistoricalListOfObjectsISaw> objectsIUsedToSee = new Queue<HistoricalListOfObjectsISaw>();
+    
     protected HashSet<int> _objectsISee = new HashSet<int>();
 
     internal HashSet<int> ObjectsISee => _objectsISee;
 
-    // TODO should be private
-    public Queue<HistoricalListOfObjectsISaw> objectsIUsedToSee = new Queue<HistoricalListOfObjectsISaw>();
 
     public void CacheAllVisibleObjects(float timestamp, HashSet<int> objectsISee)
     {

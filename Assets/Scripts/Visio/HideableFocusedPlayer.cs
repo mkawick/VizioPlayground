@@ -21,6 +21,7 @@ public class HideableFocusedPlayer : HideableCharacterController
             obj.Show();
         }
     }
+
     public override void ObjectBecameInvisible(int objId)
     {
         _objectsISee.Remove(objId); // always remove regardless

@@ -15,22 +15,27 @@ public class KeyDoesNotExistException : SystemException
 
 public class TinyWizHideableManager : MonoBehaviour
 {
+    public Dictionary<int, IHideableObject> AllObjects => allHidableObjects;
+    public Dictionary<int, IHideableObject> AttentiveObjects => allHidableObjects.Where(kv => kv.Value.Observant == true).ToDictionary(kv => kv.Key, kv => kv.Value);
+    public List<IHideableObject> NewlySpawnedObjects => newlySpawnedObjects;
+
+    internal int incrementingHidableId = 1;
+
+    //todo: create a dictionary/list for the "observant"/ attentive objects
+    List<IHideableObject> spawnedHistory;
     Dictionary<int, IHideableObject> allHidableObjects = new Dictionary<int, IHideableObject>();
     List<IHideableObject> newlySpawnedObjects = new List<IHideableObject>();
-
+    
+    int spawnedIndex = 100;
     bool hasFinishedInit = false;
-    internal int incrementingHidableId = 1;
+    public bool HasFinishedInit => hasFinishedInit;
+    [ShowInInspector, FoldoutGroup("Debug")] List<IHideableObject> DebugAttentiveObjects => AttentiveObjects.Values.ToList();
 
     void Start()
     {
         hasFinishedInit = true;
     }
 
-    public Dictionary<int, IHideableObject> AllObjects => allHidableObjects;
-    public Dictionary<int, IHideableObject> AttentiveObjects => allHidableObjects.Where(kv => kv.Value.Observant == true).ToDictionary(kv => kv.Key, kv => kv.Value);
-    public List<IHideableObject> NewlySpawnedObjects => newlySpawnedObjects;
-
-    public bool HasFinishedInit => hasFinishedInit;
 
     internal IHideableObject GetObjectById(int id)
     {
@@ -63,8 +68,6 @@ public class TinyWizHideableManager : MonoBehaviour
         }
     }
 
-    int spawnedIndex = 100;
-    List<IHideableObject> spawnedHistory;
 
     [Button]
     void SpawnObj()
@@ -83,7 +86,7 @@ public class TinyWizHideableManager : MonoBehaviour
         var obj = GameObject.Instantiate(choosenItem.Value, pos, rot * r);
         obj.name = $"spawn {choosenItem.Value.name}-{spawnedIndex++}";
         obj.Show();
-        obj.transform.parent = this.transform;// heirarchy setup
+        obj.transform.parent = this.transform;// hierarchy setup
 
         spawnedHistory.Add(obj);
     }
@@ -145,5 +148,28 @@ public class TinyWizHideableManager : MonoBehaviour
                 continue;
             allHidableObjects[objId].Show();
         }
+    }
+
+    public bool ShouldShowLocallyUsingGameplayRules(IHideableObject localHideable, IHideableObject other)
+    {
+        if (other.HasInvisibilityEffectActive())
+        {
+            return false;
+        }
+        if (other.IgnoreDistance)
+        {
+            return true;
+        }
+        var dist = Vector3.Distance(other.Position, localHideable.Position);
+        if (dist > localHideable.normalVisionRange)
+        {
+            return false;
+        }
+
+        if (dist > localHideable.restrictedVisionRange)
+        {
+            return !other.IsInZone(localHideable.GetZone());
+        }
+        return true;
     }
 }

@@ -24,12 +24,17 @@ public class VizZone : MonoBehaviour
     internal List<int> externalZonesThatSeeMe;
     public int ZoneId;
 
-    [SerializeField] string _definitionKey;
-    [SerializeField] VizZoneTag _zoneType = VizZoneTag.InsideBuilding;
+    [SerializeField] 
+    string _definitionKey;
+    [SerializeField] 
+    VizZoneTag _zoneType = VizZoneTag.InsideBuilding;
     public VizZoneTag type => _zoneType;
     bool showSelection;
 
-    [SerializeField] public Transform optionalRoot;
+    [SerializeField] 
+    public Transform optionalRoot;
+    [SerializeField, Tooltip("when the zone hides, these objects show")]
+    public GameObject optionalAppearingObjects;
 
     public int[] hiddenZones;
 
@@ -167,12 +172,4 @@ public class VizZone : MonoBehaviour
             ZoneId = Mathf.Clamp(ZoneId, 0, int.MaxValue); // or int.MaxValue, if you need to use an int but can't use uint.
         }
     }
-
-  /*  [Conditional("UNITY_EDITOR")]
-    public void SetupZoneEditorTime(VizZoneGroupHelper helper)
-    {
-        ZoneId = helper.desiredZoneId;
-        _definitionKey = helper._visibilitySettingsKey;
-        _zoneType = helper.zoneType;
-    }*/
 }

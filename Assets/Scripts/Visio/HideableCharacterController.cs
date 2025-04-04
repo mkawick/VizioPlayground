@@ -3,17 +3,9 @@ using UnityEngine;
 
 public class HideableCharacterController : IHideableObject
 {
-    public override void CancelEffect(int id)
-    {
-        // NotImplementedException
-    }
-
-    public override void ClearAllEffects()
-    {
-        // NotImplementedException
-    }
-
     PuppetController _puppet;
+
+    static Vector3 offsetSamplingPoint = new Vector3(0, 0.2f, 0);
 
     protected PuppetController puppet
     {
@@ -44,7 +36,20 @@ public class HideableCharacterController : IHideableObject
         }
     }
 
-    
+    public override Vector3 Position
+    {
+        get { return transform.position + offsetSamplingPoint; }
+    }
+
+    public override void CancelEffect(int id)
+    {
+        // NotImplementedException
+    }
+
+    public override void ClearAllEffects()
+    {
+        // NotImplementedException
+    }
 
     public override void ApplyZoneSettings(VisibilityZoneDefinition definition)
     {
@@ -77,4 +82,5 @@ public class HideableCharacterController : IHideableObject
             restrictedVisionRange = visibilityRange;
         }
     }
+    
 }

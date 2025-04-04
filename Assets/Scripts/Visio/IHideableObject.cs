@@ -6,11 +6,9 @@ public abstract partial class IHideableObject: MonoBehaviour
 
 
     [SerializeField] public Transform root;
-    [Header(
-        "This will ignore previous setup and search for renders on start. Disable this if you want to precache complex structures")]
-    [SerializeField] bool alwaysSearchForRendersOnStart = true;
+    bool alwaysSearchForRendersOnStart = true;
 
-    [SerializeField] protected Renderer[] _meshRenderer;
+    protected Renderer[] _meshRenderer;
 
     protected bool _isVisible;
     protected Vector3 _lastPosition;
@@ -18,12 +16,17 @@ public abstract partial class IHideableObject: MonoBehaviour
     public bool shouldReconsiderVisibilityOnSameZones { get; internal set; }
     protected int invisioStack = 0;
     protected int superVisionStack = 0;
-    public Vector3 positionToConsider => root.position;
 
     public int HideableId { get; set; }
 
-    public bool VisibilityDirty { get { return _visibilityDirty; } }
-    public void ClearDirty() { _visibilityDirty = false; }
+    public bool VisibilityDirty 
+    { 
+        get { return _visibilityDirty; } 
+    }
+    public void ClearDirty() 
+    {
+        _visibilityDirty = false; 
+    }
 
     private void Start()
     {
@@ -47,6 +50,11 @@ public abstract partial class IHideableObject: MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        CheckDirty();
+    }
+
     void CheckDirty()
     {
         ValidateRegister();
@@ -63,6 +71,7 @@ public abstract partial class IHideableObject: MonoBehaviour
             _visibilityDirty = true;
         }
     }
+    
     // TODO:Ideally this is done on start, however we are currently having initialization issues 
     void ValidateRegister()
     {
@@ -77,14 +86,20 @@ public abstract partial class IHideableObject: MonoBehaviour
         }
     }
 
-    private void Update()
+    public virtual bool IsLocalPlayer() 
     {
-        CheckDirty();
+        return false;
     }
 
-    
-    public virtual bool IsLocalPlayer() { return false; }
-    public virtual bool Observant { get { return true; } }
+    public virtual Vector3 Position
+    {
+        get { return root.transform.position; }
+    }
+
+    public virtual bool Observant 
+    {
+        get { return true; } 
+    }
 
     public void Show() 
     { 
@@ -100,10 +115,11 @@ public abstract partial class IHideableObject: MonoBehaviour
         _isVisible = false; 
         MakeMeshVisible(_isVisible); 
     }
- /*   public bool CanShow() { return true; }
-    public bool CanHide() { return true; }*/
 
-    public bool IsVisible() { return _isVisible; }
+    public bool IsVisible() 
+    {
+        return _isVisible;
+    }
 
     public virtual void MakeMeshVisible(bool visible) 
     {
@@ -122,6 +138,8 @@ public abstract partial class IHideableObject: MonoBehaviour
             return false;
         return true;
     }
+
+    public virtual bool IgnoreDistance => false;
 
     internal bool HasSuperVision()
     {

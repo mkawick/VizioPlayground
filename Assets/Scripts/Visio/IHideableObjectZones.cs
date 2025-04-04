@@ -15,6 +15,7 @@ public abstract partial class IHideableObject: MonoBehaviour
         _zoneIAmIn = zone;
         AddVisibleZone(_zoneIAmIn);
     }
+
     public int GetZone() { return _zoneIAmIn; }
     public int GetPreviousZone() { return _zoneIWasIn; }
 

@@ -54,8 +54,9 @@ public class HideableItemPropertyViewer : MonoBehaviour
 
     void Update()
     {
+#if UNITY_EDITOR
         var tempZone = hideableObject.GetZone();
-        if(myZone != tempZone)
+        if (myZone != tempZone)
         {
             myLastZone = myZone;
             myZone = tempZone;
@@ -65,6 +66,7 @@ public class HideableItemPropertyViewer : MonoBehaviour
         ShowConnections();
 
         UpdateHistoricalView();
+#endif
     }
 
     private void UpdateListOfVisibleObjects()
