@@ -7,6 +7,12 @@ public class HideableCharacterController : IHideableObject
 
     static Vector3 offsetSamplingPoint = new Vector3(0, 0.2f, 0);
 
+    public override bool Moveable
+    {
+        get { return true; }
+        set { }
+    }
+
     protected PuppetController puppet
     {
         get

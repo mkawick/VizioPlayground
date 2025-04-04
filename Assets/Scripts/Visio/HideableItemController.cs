@@ -17,7 +17,11 @@ public class HideableItemController : IHideableObject
     }
 
     public override bool Observant { get { return false; } }
-
+    public override bool Moveable
+    {
+        get;
+        set;
+    }
 
 
     bool invisibilityActive = false;

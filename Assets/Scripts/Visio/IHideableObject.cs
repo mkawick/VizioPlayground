@@ -59,7 +59,7 @@ public abstract partial class IHideableObject: MonoBehaviour
     {
         ValidateRegister();
 
-        if (!Observant)
+        if (!Moveable)
         {
             return;
         }
@@ -99,6 +99,12 @@ public abstract partial class IHideableObject: MonoBehaviour
     public virtual bool Observant 
     {
         get { return true; } 
+    }
+
+    public virtual bool Moveable
+    {
+        get { return false; }
+        set { }
     }
 
     public void Show() 

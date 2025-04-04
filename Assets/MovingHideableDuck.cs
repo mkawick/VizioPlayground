@@ -4,20 +4,17 @@ public class MovingHideableDuck : MonoBehaviour
 {
     int whichLocation = 0;
     [SerializeField] public PositionMover positionMover;
+    [SerializeField] public KeyCode keyDown = KeyCode.RightArrow;
 
-
-    // Update is called once per frame
     void Update()
     {
-            if (Input.GetKeyUp(KeyCode.RightArrow))
-            {
-                int oldLocationIndex = whichLocation;
-                whichLocation--; if (whichLocation < 0)
-                { whichLocation = positionMover.transportLocations.Length - 1; }
-                Next(oldLocationIndex, whichLocation);  
-            }
-
-
+        if (Input.GetKeyUp(keyDown))
+        {
+            int oldLocationIndex = whichLocation;
+            whichLocation--; if (whichLocation < 0)
+            { whichLocation = positionMover.transportLocations.Length - 1; }
+            Next(oldLocationIndex, whichLocation);
+        }
     }
     void Next(int oldLocationIndex, int newLocationIndex)
     {
