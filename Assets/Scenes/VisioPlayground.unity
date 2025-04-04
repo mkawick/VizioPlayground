@@ -245,7 +245,8 @@ MonoBehaviour:
   ZoneId: 5
   _definitionKey: 
   _zoneType: 2
-  root: {fileID: 0}
+  optionalRoot: {fileID: 0}
+  optionalAppearingObjects: {fileID: 0}
   hiddenZones: 
   highlightMaterial: {fileID: 2100000, guid: c2b061b42019a174fba496b2d43e6d3c, type: 2}
   text: {fileID: 697374840}
@@ -539,7 +540,8 @@ MonoBehaviour:
   ZoneId: 8
   _definitionKey: 
   _zoneType: 2
-  root: {fileID: 0}
+  optionalRoot: {fileID: 0}
+  optionalAppearingObjects: {fileID: 0}
   hiddenZones: 
   highlightMaterial: {fileID: 2100000, guid: c2b061b42019a174fba496b2d43e6d3c, type: 2}
   text: {fileID: 279269476}
@@ -1006,8 +1008,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 134231680}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
 --- !u!1001 &184015465
@@ -1111,8 +1111,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 184015466}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
   _particles: []
@@ -1236,8 +1234,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 194804383}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
   _particles: []
@@ -1595,8 +1591,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 284072632}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
 --- !u!114 &284072635
@@ -2032,8 +2026,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 356827001}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
 --- !u!1001 &363255805
@@ -2276,7 +2268,7 @@ PrefabInstance:
     - target: {fileID: 7658701295548142335, guid: 11c8db76bf5fa6441aa4a38a9c2802cb,
         type: 3}
       propertyPath: 'hiddenZones.Array.data[1]'
-      value: 18
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2390,8 +2382,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 385122145}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
   _particles: []
@@ -2587,7 +2577,8 @@ MonoBehaviour:
   ZoneId: 0
   _definitionKey: 
   _zoneType: 2
-  root: {fileID: 0}
+  optionalRoot: {fileID: 0}
+  optionalAppearingObjects: {fileID: 0}
   hiddenZones: 
   highlightMaterial: {fileID: 2100000, guid: c2b061b42019a174fba496b2d43e6d3c, type: 2}
   text: {fileID: 47561704}
@@ -3164,7 +3155,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   transportLocations:
-  - {fileID: 873849324}
+  - {fileID: 592435607}
   - {fileID: 1938058140}
   - {fileID: 868465346}
   - {fileID: 1999128075}
@@ -3174,6 +3165,8 @@ MonoBehaviour:
   - {fileID: 33865129}
   - {fileID: 592435607}
   - {fileID: 871778802}
+  - {fileID: 592435607}
+  - {fileID: 873849324}
   player: {fileID: 2092321119}
 --- !u!1 &697374838
 GameObject:
@@ -3902,8 +3895,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 68922376}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
 --- !u!114 &1026721941
@@ -4366,8 +4357,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 1138004482}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
 --- !u!114 &1138004485
@@ -4414,8 +4403,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 1142022582}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
 --- !u!114 &1142022584
@@ -4675,7 +4662,7 @@ PrefabInstance:
     - target: {fileID: 2908867424930734687, guid: 11c8db76bf5fa6441aa4a38a9c2802cb,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -46.27
+      value: -48.45
       objectReference: {fileID: 0}
     - target: {fileID: 2908867424930734687, guid: 11c8db76bf5fa6441aa4a38a9c2802cb,
         type: 3}
@@ -4974,8 +4961,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 1301300258}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
 --- !u!114 &1301300261
@@ -5016,8 +5001,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 989802152}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
 --- !u!114 &1389828344
@@ -5205,8 +5188,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 1439532229}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
 --- !u!1001 &1480539559
@@ -5325,8 +5306,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 1480539560}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
 --- !u!114 &1480539563
@@ -5552,8 +5531,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 1618698368}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
 --- !u!1 &1632294632
@@ -5728,11 +5705,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02a728681acbfed459148b401afc2347, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numFramesAfterLeavingZoneBeforeHide: 120
-  gameplayRulesFrequency: 10
-  clearHistoryOnMoveFlag: 1
-  waitForArenaToStart: 0
-  debugZone: 1
+  _numFramesAfterLeavingZoneBeforeHide: 74
+  _gameplayRulesFrequency: 10
+  _clearHistoryOnMoveFlag: 1
+  _zonesOutsideCanSee: 1600000010000000
+  _waitForArenaToStart: 0
+  _debugZone: 1
   _zonesThatSeeOutside: 16000000
   ErrorText: 
 --- !u!1 &1754742998
@@ -5980,7 +5958,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 34.8, y: -19.4}
+  m_AnchoredPosition: {x: 34.799988, y: -19.400024}
   m_SizeDelta: {x: 250.7, y: 105.4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1780189749
@@ -6122,8 +6100,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 1786502889}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
   _particles: []
@@ -6345,7 +6321,8 @@ MonoBehaviour:
   ZoneId: 8
   _definitionKey: 
   _zoneType: 2
-  root: {fileID: 0}
+  optionalRoot: {fileID: 0}
+  optionalAppearingObjects: {fileID: 0}
   hiddenZones: 
   highlightMaterial: {fileID: 2100000, guid: c2b061b42019a174fba496b2d43e6d3c, type: 2}
   text: {fileID: 2082987993}
@@ -6533,8 +6510,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 1904793246}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
 --- !u!114 &1904793249
@@ -6608,7 +6583,8 @@ MonoBehaviour:
   ZoneId: 8
   _definitionKey: 
   _zoneType: 2
-  root: {fileID: 0}
+  optionalRoot: {fileID: 0}
+  optionalAppearingObjects: {fileID: 0}
   hiddenZones: 
   highlightMaterial: {fileID: 2100000, guid: c2b061b42019a174fba496b2d43e6d3c, type: 2}
   text: {fileID: 713878329}
@@ -7104,6 +7080,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 2081067077}
+    - targetCorrespondingSourceObject: {fileID: 3294758251327466535, guid: 1c5dda3c7cd3cf742afcade5419faeab,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2081067079}
   m_SourcePrefab: {fileID: 100100000, guid: 1c5dda3c7cd3cf742afcade5419faeab, type: 3}
 --- !u!4 &2081067074 stripped
 Transform:
@@ -7130,8 +7110,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 2081067074}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
 --- !u!114 &2081067077
@@ -7153,6 +7131,19 @@ MonoBehaviour:
   showVisibleConnections: 0
   objectsISee: []
   objectsISaw: []
+--- !u!114 &2081067079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2081067075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 533684a34fa1362499f7ef935ff7ae93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  positionMover: {fileID: 607777413}
 --- !u!1 &2082987991
 GameObject:
   m_ObjectHideFlags: 0
@@ -7327,8 +7318,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   root: {fileID: 2092321119}
-  alwaysSearchForRendersOnStart: 1
-  _meshRenderer: []
   restrictedVisionRange: 3.4028235e+38
   normalVisionRange: 3.4028235e+38
 --- !u!114 &2092321123

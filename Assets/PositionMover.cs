@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public class PositionMover : MonoBehaviour
 {
     PlayerInputActions inputActions;
-    [SerializeField] Transform[] transportLocations;
+    [SerializeField] public Transform[] transportLocations;
     int whichLocation = 0;
     [SerializeField] Transform player;
 

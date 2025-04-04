@@ -564,7 +564,7 @@ public class Visio : MonoBehaviour
         }
     }
 
-    public class DistanceComparer : IComparer<Transform>
+    public class DistanceComparer : IComparer<Collider>
     {
         private Transform target;
 
@@ -573,10 +573,10 @@ public class Visio : MonoBehaviour
             target = distanceToTarget;
         }
 
-        public int Compare(Transform a, Transform b)
+        public int Compare(Collider a, Collider b)
         {
             var targetPosition = target.position;
-            return Vector3.Distance(a.position, targetPosition).CompareTo(Vector3.Distance(b.position, targetPosition));
+            return Vector3.Distance(a.transform.position, targetPosition).CompareTo(Vector3.Distance(b.transform.position, targetPosition));
         }
     }
 
@@ -585,10 +585,12 @@ public class Visio : MonoBehaviour
         int num = Physics.OverlapSphereNonAlloc(position, searchRadius, _collidersTracker, layerMask);
 
         DistanceComparer distanceComparer = new DistanceComparer(transform);
-        Array.Sort(_collidersTracker, 0, num, (IComparer)distanceComparer);
+        System.Array.Sort(_collidersTracker, 0, num, distanceComparer);
         List<Collider> colliders = new List<Collider>();
         for (int i = 0; i < num; i++)
+        {
             colliders.Add(_collidersTracker[i]);
+        }
 
         return colliders;
     }
