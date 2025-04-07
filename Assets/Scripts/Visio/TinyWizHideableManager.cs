@@ -15,16 +15,16 @@ public class KeyDoesNotExistException : SystemException
 
 public class TinyWizHideableManager : MonoBehaviour
 {
-    public Dictionary<int, IHideableObject> AllObjects => allHidableObjects;
-    public Dictionary<int, IHideableObject> AttentiveObjects => allHidableObjects.Where(kv => kv.Value.Observant == true).ToDictionary(kv => kv.Key, kv => kv.Value);
-    public List<IHideableObject> NewlySpawnedObjects => newlySpawnedObjects;
+    public Dictionary<int, IHideableObject> AllObjects => _allHidableObjects;
+    public Dictionary<int, IHideableObject> AttentiveObjects => _allHidableObjects.Where(kv => kv.Value.Observant == true).ToDictionary(kv => kv.Key, kv => kv.Value);
+    public List<IHideableObject> NewlySpawnedObjects => _newlySpawnedObjects;
 
     internal int incrementingHidableId = 1;
 
     //todo: create a dictionary/list for the "observant"/ attentive objects
     List<IHideableObject> spawnedHistory;
-    Dictionary<int, IHideableObject> allHidableObjects = new Dictionary<int, IHideableObject>();
-    List<IHideableObject> newlySpawnedObjects = new List<IHideableObject>();
+    Dictionary<int, IHideableObject> _allHidableObjects = new Dictionary<int, IHideableObject>();
+    List<IHideableObject> _newlySpawnedObjects = new List<IHideableObject>();
     
     int spawnedIndex = 100;
     bool hasFinishedInit = false;
@@ -39,9 +39,9 @@ public class TinyWizHideableManager : MonoBehaviour
 
     internal IHideableObject GetObjectById(int id)
     {
-        if (allHidableObjects.ContainsKey(id))
+        if (_allHidableObjects.ContainsKey(id))
         {
-            return allHidableObjects[id];
+            return _allHidableObjects[id];
         }
         return null;
     }
@@ -51,20 +51,20 @@ public class TinyWizHideableManager : MonoBehaviour
         {
             obj.Hide();
             obj.HideableId = incrementingHidableId++;
-            allHidableObjects.Add(obj.HideableId, obj);
-            newlySpawnedObjects.Add(obj);
+            _allHidableObjects.Add(obj.HideableId, obj);
+            _newlySpawnedObjects.Add(obj);
         }
     }
     public void Remove(IHideableObject obj)
     {
         if (obj.HideableId != 0)
         {
-            if (allHidableObjects.ContainsKey(obj.HideableId))
+            if (_allHidableObjects.ContainsKey(obj.HideableId))
             {
-                allHidableObjects.Remove(obj.HideableId);
+                _allHidableObjects.Remove(obj.HideableId);
             }
-            if (newlySpawnedObjects.Contains(obj))
-                newlySpawnedObjects.Remove(obj);
+            if (_newlySpawnedObjects.Contains(obj))
+                _newlySpawnedObjects.Remove(obj);
         }
     }
 
@@ -75,7 +75,7 @@ public class TinyWizHideableManager : MonoBehaviour
         if (spawnedHistory == null)
             spawnedHistory = new List<IHideableObject>();
         var choice = UnityEngine.Random.Range(0, AllObjects.Count);
-        var choosenItem = allHidableObjects.Skip(choice).First();
+        var choosenItem = _allHidableObjects.Skip(choice).First();
 
         Vector3 pos = choosenItem.Value.transform.position;
         Quaternion rot = choosenItem.Value.transform.rotation;
@@ -112,7 +112,7 @@ public class TinyWizHideableManager : MonoBehaviour
     internal void GetAllPlayersInZone(int zoneId,
         HashSet<int> objectsInZone)
     {
-        foreach(var obj in allHidableObjects)
+        foreach(var obj in _allHidableObjects)
         {
             if(obj.Value.GetZone() == zoneId)
             {
@@ -121,20 +121,32 @@ public class TinyWizHideableManager : MonoBehaviour
         }
     }
 
+    internal void GetAllObjectsInZones(List<int> zoneIds,
+        HashSet<int> objectsInZone)
+    {
+        foreach (var obj in _allHidableObjects)
+        {
+            if (zoneIds.Contains(obj.Value.GetZone()))
+            {
+                objectsInZone.Add(obj.Key);
+            }
+        }
+    }
+
     internal void InformObjectThatIAmVisible(int hidableId, HashSet<int> audience)
     {
-        if (allHidableObjects.ContainsKey(hidableId) == false)
+        if (_allHidableObjects.ContainsKey(hidableId) == false)
             throw new KeyDoesNotExistException();
 
-        var hider = allHidableObjects[hidableId];
+        var hider = _allHidableObjects[hidableId];
         
         foreach(var objId in audience)
         {
-            if (allHidableObjects.ContainsKey(objId) == false)
+            if (_allHidableObjects.ContainsKey(objId) == false)
                 continue;
-            if (allHidableObjects[objId].Observant)
+            if (_allHidableObjects[objId].Observant)
             {
-                allHidableObjects[objId].ObjectBecameVisible(hidableId);
+                _allHidableObjects[objId].ObjectBecameVisible(hidableId);
             }
             // send notification
         }
@@ -144,9 +156,9 @@ public class TinyWizHideableManager : MonoBehaviour
     {
         foreach(var objId in objectsToShow)
         {
-            if (allHidableObjects.ContainsKey(objId) == false)
+            if (_allHidableObjects.ContainsKey(objId) == false)
                 continue;
-            allHidableObjects[objId].Show();
+            _allHidableObjects[objId].Show();
         }
     }
 

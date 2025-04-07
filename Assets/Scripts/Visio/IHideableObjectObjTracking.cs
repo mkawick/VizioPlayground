@@ -125,18 +125,14 @@ public abstract partial class IHideableObject: MonoBehaviour
     HashSet<int> CollectAllObjectsThatISee()
     {
         HashSet<int> objectsISee = new HashSet<int>();
+
         if (Observant)
         {
-            foreach (var zoneId in _zonesISee)
-            {
-                _tinyWizHideableManager.GetAllPlayersInZone(zoneId, objectsISee);
-            }
-
-            _tinyWizHideableManager.GetAllPlayersInZone(_zoneIAmIn, objectsISee);
-
+            _tinyWizHideableManager.GetAllObjectsInZones(_zonesISee, objectsISee);
             // no need to keep yourself in the list
             objectsISee.Remove(HideableId);
         }
+
         return objectsISee;
     }
 
