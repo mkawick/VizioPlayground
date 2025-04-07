@@ -1,54 +1,66 @@
 ﻿using Sirenix.OdinInspector;
 using UnityEngine;
 
-public abstract partial class IHideableObject: MonoBehaviour
+public abstract partial class IHideableObject : MonoBehaviour
 {
-    static protected TinyWizHideableManager _tinyWizHideableManager;
+    public enum VisibleState
+    {
 
+        Initializing,
+        Visible,
+        Hidden,
+        Disabled
+    }
 
+    protected static TinyWizHideableManager _tinyWizHideableManager;
+
+    [SerializeField] public VisibleState startAs = VisibleState.Visible;
     [SerializeField] public Transform root;
-    bool alwaysSearchForRendersOnStart = true;
 
-    protected Renderer[] _meshRenderer;
+    [Header(
+        "This will ignore previous setup and search for renders on start. Disable this if you want to precache complex structures")]
+    [SerializeField] bool alwaysSearchForRendersOnStart = true;
 
-    protected bool _isVisible;
-    protected Vector3 _lastPosition;
-    protected bool _visibilityDirty;
-    public bool shouldReconsiderVisibilityOnSameZones { get; internal set; }
+    protected Renderer[] _meshRenderers;
+
+    VisibleState visibleState = VisibleState.Initializing;
+    Vector3 _lastPosition;
+    bool _visibilityDirty;
     protected int invisioStack = 0;
     protected int superVisionStack = 0;
 
-    public int HideableId { get; set; }
+    public int HideableId { get; private set; }
 
-    public bool VisibilityDirty 
-    { 
-        get { return _visibilityDirty; } 
-    }
-    public void ClearDirty() 
+    public bool VisibilityDirty
     {
-        _visibilityDirty = false; 
+        get { return _visibilityDirty; }
     }
 
-    private void Start()
+    public void ClearDirty()
+    {
+        _visibilityDirty = false;
+    }
+
+    private void OnEnable()
     {
         if (root == null)
         {
             root = transform;
         }
-
-        _visibilityDirty = true;
-        shouldReconsiderVisibilityOnSameZones = true;
-        _isVisible = true;
         _lastPosition = root.position;
 
         FindRenderersInChildren(alwaysSearchForRendersOnStart, transform);
+
+        //MakeMeshVisible(true); // TODO .... only show if local player says yes
     }
-    void OnDestroy()
+
+    void OnDisable()
     {
-        if(_tinyWizHideableManager)
+        if (_tinyWizHideableManager)
         {
-            _tinyWizHideableManager.Remove(this);
+            HideableId = _tinyWizHideableManager.Remove(this);
         }
+        visibleState = VisibleState.Disabled;
     }
 
     void Update()
@@ -72,7 +84,7 @@ public abstract partial class IHideableObject: MonoBehaviour
             _visibilityDirty = true;
         }
     }
-    
+
     // TODO:Ideally this is done on start, however we are currently having initialization issues 
     void ValidateRegister()
     {
@@ -83,11 +95,17 @@ public abstract partial class IHideableObject: MonoBehaviour
                 _tinyWizHideableManager = GameObject.FindAnyObjectByType<TinyWizHideableManager>();
             }
 
-            _tinyWizHideableManager?.Register(this);
+
+            HideableId = _tinyWizHideableManager?.Register(this) ?? 0;
+            if (HideableId != 0)
+            {
+                _visibilityDirty = true;
+                shouldReconsiderVisibilityOnSameZones = true;
+            }
         }
     }
 
-    public virtual bool IsLocalPlayer() 
+    public virtual bool IsLocalPlayer()
     {
         return false;
     }
@@ -96,11 +114,13 @@ public abstract partial class IHideableObject: MonoBehaviour
     {
         get { return root.transform.position; }
     }
+
     [ShowInInspector]
-    public virtual bool Observant 
+    public virtual bool Observant
     {
-        get { return true; } 
+        get { return true; }
     }
+
     [ShowInInspector]
     public virtual bool Moveable
     {
@@ -108,60 +128,59 @@ public abstract partial class IHideableObject: MonoBehaviour
         set { }
     }
 
-    public void Show() 
-    { 
-        if (IsVisible()) 
-            return;
-        _isVisible = true; 
-        MakeMeshVisible(_isVisible); 
-    }
-    public virtual void Hide() 
-    { 
-        if (!IsVisible()) 
-            return; 
-        _isVisible = false; 
-        MakeMeshVisible(_isVisible); 
-    }
+    public bool shouldReconsiderVisibilityOnSameZones { get; internal set; }
 
-    public bool IsVisible() 
+    public void Show()
     {
-        return _isVisible;
-    }
-
-    public virtual void MakeMeshVisible(bool visible) 
-    {
-        if (_meshRenderer == null)
-            return;
-
-        for(int i = 0; i< _meshRenderer.Length; i++)
+        if (visibleState == VisibleState.Visible)
         {
-            _meshRenderer[i].enabled = visible;
+            return;
+        }
+        visibleState = VisibleState.Visible;
+        MakeMeshVisible(true);
+    }
+
+    public void Hide()
+    {
+        if (visibleState == VisibleState.Hidden)
+        {
+            return;
+        }
+        visibleState = VisibleState.Hidden;
+        MakeMeshVisible(false);
+    }
+
+    public bool IsVisible()
+    {
+        return visibleState == VisibleState.Visible;
+    }
+
+    public virtual void MakeMeshVisible(bool visible)
+    {
+        if (_meshRenderers != null && _meshRenderers.Length > 0)
+        {
+            for (int i = 0; i < _meshRenderers.Length; i++)
+            {
+                _meshRenderers[i].enabled = visible;
+            }
         }
     }
 
     internal bool HasInvisibilityEffectActive()
     {
-        if(invisioStack == 0)
-            return false;
-        return true;
+        return invisioStack != 0;
     }
 
     public virtual bool IgnoreDistance => false;
 
-    internal bool HasSuperVision()
-    {
-        if (superVisionStack == 0)
-            return false;
-        return true;
-    }
-
     protected virtual void FindRenderersInChildren(bool invalidatePrevious, Transform search)
     {
-        if (_meshRenderer == null
-            || _meshRenderer.Length == 0
+        if (_meshRenderers == null
+            || _meshRenderers.Length == 0
             || invalidatePrevious)
         {
-            _meshRenderer = search.GetComponentsInChildren<Renderer>(true);
+            _meshRenderers = search.GetComponentsInChildren<Renderer>(true);
         }
     }
+
 }

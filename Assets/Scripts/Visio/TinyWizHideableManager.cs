@@ -37,26 +37,39 @@ public class TinyWizHideableManager : MonoBehaviour
         hasFinishedInit = true;
     }
 
-
     internal IHideableObject GetObjectById(int id)
     {
         if (_allHidableObjects.ContainsKey(id))
         {
             return _allHidableObjects[id];
         }
+
         return null;
     }
-    public void Register(IHideableObject obj)
+
+    public int Register(IHideableObject obj)
     {
-        if(obj.HideableId == 0)
+        if (obj.HideableId == 0)
         {
-            obj.Hide();
-            obj.HideableId = incrementingHidableId++;
-            _allHidableObjects.Add(obj.HideableId, obj);
+            var hideableId = incrementingHidableId++;
+            _allHidableObjects.Add(hideableId, obj);
             _newlySpawnedObjects.Add(obj);
+
+            if (obj.startAs == IHideableObject.VisibleState.Visible)
+            {
+                obj.Show();
+            }
+            else
+            {
+                obj.Hide();
+            }
+
+            return hideableId;
         }
+        return obj.HideableId;
     }
-    public void Remove(IHideableObject obj)
+
+    public int Remove(IHideableObject obj)
     {
         if (obj.HideableId != 0)
         {
@@ -64,11 +77,12 @@ public class TinyWizHideableManager : MonoBehaviour
             {
                 _allHidableObjects.Remove(obj.HideableId);
             }
+
             if (_newlySpawnedObjects.Contains(obj))
                 _newlySpawnedObjects.Remove(obj);
         }
+        return 0;
     }
-
 
     [Button]
     void SpawnObj()

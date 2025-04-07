@@ -48,12 +48,12 @@ public class HideableItemController : IHideableObject
 
     public override void MakeMeshVisible(bool visible)
     {
-        if (_meshRenderer != null && _meshRenderer.Length > 0)
+        if (_meshRenderers != null && _meshRenderers.Length > 0)
         {
             // Debug.LogWarning($"MakeMeshVisible: _meshRenderer {this.name}, {Environment.StackTrace}");
-            for (int i = 0; i < _meshRenderer.Length; i++)
+            for (int i = 0; i < _meshRenderers.Length; i++)
             {
-                _meshRenderer[i].enabled = visible;
+                _meshRenderers[i].enabled = visible;
             }
         }
 
