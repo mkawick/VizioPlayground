@@ -1,7 +1,9 @@
 fileFormatVersion: 2
-guid: 5c65184932ff4fd48a343e236025096f
-timeCreated: 1488828285
-DefaultImporter:
+guid: 0675e2791073a4147b190e55f1da7ac2
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
   userData: 
   assetBundleName: 
   assetBundleVariant: 
@@ -10,5 +12,5 @@ AssetOrigin:
   productId: 89041
   packageName: Odin Inspector and Serializer
   packageVersion: 3.3.1.11
-  assetPath: Assets/Plugins/Odin/Assemblies/Sirenix.Utilities.Editor.xml
+  assetPath: Assets/Plugins/Odin/Odin Inspector/Assets/Editor/Hidden/ExtractSpriteShader.shader
   uploadId: 712389

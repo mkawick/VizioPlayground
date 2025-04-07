@@ -475,34 +475,34 @@ public class Visio : MonoBehaviour
 
     void UpdateZonesOfMovedItems()
     {
-        var attentiveObjects = _tinyWizPlayerManager.AttentiveObjects;
+        var moveableObjects = _tinyWizPlayerManager.MoveableObjects;
         bool didSomethingMove = false;
 
-        foreach (var attentive in attentiveObjects.Values)
+        foreach (var moveable in moveableObjects.Values)
         {
-            if (attentive.VisibilityDirty == false)
+            if (moveable.VisibilityDirty == false)
                 continue;
 
-            attentive.ClearDirty();
+            moveable.ClearDirty();
 
             int newZoneId;
             VizZone vizZone;
             FindMostLikelyContainingZone(
-                you: attentive,
+                you: moveable,
                 layerToSearch: _layerToSearch,
                 searchRadius: ZONE_SEARCH_RADIUS,
                 out newZoneId,
                 out vizZone);
 
-            var previousZoneId = attentive.GetZone();
+            var previousZoneId = moveable.GetZone();
             if (newZoneId == previousZoneId)
             {
-                didSomethingMove = attentive.shouldReconsiderVisibilityOnSameZones;
+                didSomethingMove = moveable.shouldReconsiderVisibilityOnSameZones;
                 continue;
             }
 
-            bool isLocalPlayer = attentive == _localPlayer;
-            HandleMoveZone(previousZoneId, attentive, vizZone, newZoneId);
+            bool isLocalPlayer = moveable == _localPlayer;
+            HandleMoveZone(previousZoneId, moveable, vizZone, newZoneId);
             if(isLocalPlayer)
             {
                 HandleHiddenZones(newZoneId, previousZoneId);

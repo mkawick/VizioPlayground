@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Sirenix.OdinInspector;
+using UnityEngine;
 
 public abstract partial class IHideableObject: MonoBehaviour
 {
@@ -95,12 +96,12 @@ public abstract partial class IHideableObject: MonoBehaviour
     {
         get { return root.transform.position; }
     }
-
+    [ShowInInspector]
     public virtual bool Observant 
     {
         get { return true; } 
     }
-
+    [ShowInInspector]
     public virtual bool Moveable
     {
         get { return false; }

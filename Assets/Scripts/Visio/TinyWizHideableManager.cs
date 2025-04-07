@@ -17,6 +17,7 @@ public class TinyWizHideableManager : MonoBehaviour
 {
     public Dictionary<int, IHideableObject> AllObjects => _allHidableObjects;
     public Dictionary<int, IHideableObject> AttentiveObjects => _allHidableObjects.Where(kv => kv.Value.Observant == true).ToDictionary(kv => kv.Key, kv => kv.Value);
+    public Dictionary<int, IHideableObject> MoveableObjects => _allHidableObjects.Where(kv => kv.Value.Moveable == true).ToDictionary(kv => kv.Key, kv => kv.Value);
     public List<IHideableObject> NewlySpawnedObjects => _newlySpawnedObjects;
 
     internal int incrementingHidableId = 1;
